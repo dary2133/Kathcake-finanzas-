@@ -156,22 +156,6 @@ export default function AccountForm({ initialData, onSuccess, onCancel, onDelete
                 >
                     {initialData ? 'Actualizar' : 'Guardar'} Cuenta
                 </button>
-                {initialData && onDelete && (
-                    <button
-                        type="button"
-                        onClick={() => {
-                            if (window.confirm('¿Deseas eliminar esta cuenta de forma permanente?')) {
-                                onDelete(initialData.id);
-                                onSuccess();
-                                window.location.reload();
-                            }
-                        }}
-                        className="p-3 border border-rose-200 text-rose-600 rounded-xl hover:bg-rose-50 transition-colors"
-                        title="Borrar Cuenta"
-                    >
-                        🗑️
-                    </button>
-                )}
             </div>
         </form>
     );

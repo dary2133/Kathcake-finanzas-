@@ -99,22 +99,6 @@ export default function FixedExpenseForm({ initialData, onSuccess, onCancel, onD
                 >
                     {initialData ? 'Actualizar' : 'Guardar'} Gasto Fijo
                 </button>
-                {initialData && onDelete && (
-                    <button
-                        type="button"
-                        onClick={() => {
-                            if (window.confirm('¿Deseas eliminar este gasto fijo?')) {
-                                onDelete(initialData.id);
-                                onSuccess();
-                                window.location.reload();
-                            }
-                        }}
-                        className="p-3 border border-rose-200 text-rose-600 rounded-xl hover:bg-rose-50 transition-colors"
-                        title="Borrar Gasto Fijo"
-                    >
-                        🗑️
-                    </button>
-                )}
             </div>
         </form>
     );

@@ -77,9 +77,9 @@ export default function TransactionList({ transactions, onDelete, onEdit, onRese
                                                 <span>Editar</span>
                                             </button>
                                             <button
-                                                onClick={() => {
+                                                onClick={async () => {
                                                     if (window.confirm('¿Eliminar este registro?')) {
-                                                        onDelete && onDelete(t.id);
+                                                        if (onDelete) await onDelete(t.id);
                                                         window.location.reload();
                                                     }
                                                 }}

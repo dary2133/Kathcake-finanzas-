@@ -129,9 +129,9 @@ export default function CuentasPage() {
                                             <p className="font-bold text-slate-700">{formatCurrency(acc.balance, currency, currencySymbol)}</p>
                                             <div className="flex gap-2">
                                                 <button onClick={() => startEditAccount(acc)} className="p-1 hover:bg-blue-50 rounded text-blue-500 transition-colors">✏️</button>
-                                                <button onClick={() => {
+                                                <button onClick={async () => {
                                                     if (window.confirm('¿Eliminar esta cuenta?')) {
-                                                        removeAccount(acc.id);
+                                                        await removeAccount(acc.id);
                                                         window.location.reload();
                                                     }
                                                 }} className="p-1 hover:bg-rose-50 rounded text-rose-500 transition-colors" title="Eliminar Cuenta">🗑️</button>
@@ -164,9 +164,9 @@ export default function CuentasPage() {
                                                 <p className="font-bold text-rose-600">{formatCurrency(acc.balance, currency, currencySymbol)}</p>
                                                 <div className="flex gap-2 text-sm">
                                                     <button onClick={() => startEditAccount(acc)} className="p-1 hover:bg-blue-50 rounded text-blue-500 transition-colors">✏️</button>
-                                                    <button onClick={() => {
+                                                    <button onClick={async () => {
                                                         if (window.confirm('¿Eliminar tarjeta?')) {
-                                                            removeAccount(acc.id);
+                                                            await removeAccount(acc.id);
                                                             window.location.reload();
                                                         }
                                                     }} className="p-1 hover:bg-rose-50 rounded text-rose-500 transition-colors" title="Eliminar Tarjeta">🗑️</button>
@@ -219,9 +219,9 @@ export default function CuentasPage() {
                                             <td className="px-1 py-1 text-center">
                                                 <div className="flex justify-center gap-2">
                                                     <button onClick={() => startEditFixed(exp)} className="text-blue-500 hover:text-blue-700 p-1" title="Editar">✏️</button>
-                                                    <button onClick={() => {
+                                                    <button onClick={async () => {
                                                         if (window.confirm('¿Eliminar este gasto fijo?')) {
-                                                            removeFixedExpense(exp.id);
+                                                            await removeFixedExpense(exp.id);
                                                             window.location.reload();
                                                         }
                                                     }} className="text-rose-500 hover:text-rose-700 p-1" title="Eliminar">🗑️</button>

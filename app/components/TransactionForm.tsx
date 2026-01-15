@@ -243,23 +243,6 @@ export default function TransactionForm({ type, initialData, onSuccess, onCancel
                 >
                     {initialData ? 'Actualizar' : 'Guardar'} {type === 'EXPENSE' ? 'Gasto' : 'Ingreso'}
                 </button>
-                {initialData && onDelete && (
-                    <button
-                        type="button"
-                        onClick={() => {
-                            if (window.confirm('¿Deseas eliminar este registro de forma permanente?')) {
-                                onDelete(initialData.id);
-                                onSuccess();
-                                window.location.reload();
-                            }
-                        }}
-                        className="px-4 py-2 border border-rose-200 text-rose-600 font-medium rounded-xl hover:bg-rose-50 transition-colors flex items-center gap-2"
-                        title="Eliminar registro"
-                    >
-                        <span>Borrar</span>
-                        <span>🗑️</span>
-                    </button>
-                )}
                 {onCancel && (
                     <button
                         type="button"
