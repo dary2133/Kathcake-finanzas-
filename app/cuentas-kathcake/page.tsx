@@ -5,6 +5,7 @@ import Layout from '../components/Layout';
 import AccountForm from '../components/AccountForm';
 import FixedExpenseForm from '../components/FixedExpenseForm';
 import FixedIncomeForm from '../components/FixedIncomeForm';
+import CardExpenseForm from '../components/CardExpenseForm';
 import { useAccounts, useSettings, useFixedExpenses, useFixedIncomes } from '../lib/hooks';
 import { formatCurrency } from '../lib/utils';
 import { Account, FixedExpense, FixedIncome } from '../lib/types';
@@ -23,10 +24,13 @@ export default function CuentasKathcakePage() {
     const [editingFixedExpense, setEditingFixedExpense] = useState<FixedExpense | null>(null);
     const [editingFixedIncome, setEditingFixedIncome] = useState<FixedIncome | null>(null);
     const [showAccountForm, setShowAccountForm] = useState(false);
+    const [accountFormSection, setAccountFormSection] = useState<'REGULAR' | 'CREDIT' | null>(null);
+    const [showCardExpenseForm, setShowCardExpenseForm] = useState(false);
     const [showFixedExpenseForm, setShowFixedExpenseForm] = useState(false);
     const [showFixedIncomeForm, setShowFixedIncomeForm] = useState(false);
 
-    const handleAccountSuccess = () => { setShowAccountForm(false); setEditingAccount(null); refreshAccounts(); };
+    const handleAccountSuccess = () => { setShowAccountForm(false); setAccountFormSection(null); setEditingAccount(null); refreshAccounts(); };
+    const handleCardExpenseSuccess = () => { setShowCardExpenseForm(false); refreshAccounts(); };
     const handleFixedExpenseSuccess = () => { setShowFixedExpenseForm(false); setEditingFixedExpense(null); refreshFixedExpenses(); };
     const handleFixedIncomeSuccess = () => { setShowFixedIncomeForm(false); setEditingFixedIncome(null); refreshFixedIncomes(); };
 
@@ -36,7 +40,9 @@ export default function CuentasKathcakePage() {
     const safeIncomes = Array.isArray(fixedIncomes) ? fixedIncomes.filter(Boolean) : [];
 
     const liquidFunds = safeAccounts.filter(a => a.type !== 'CREDIT');
+    const creditCards = safeAccounts.filter(a => a.type === 'CREDIT');
     const totalFunds = liquidFunds.reduce((sum, a) => sum + (Number(a.balance) || 0), 0);
+    const totalDebt = creditCards.reduce((sum, a) => sum + (Number(a.balance) || 0), 0);
     const totalFixedIncome = safeIncomes.reduce((sum, i) => sum + (Number(i.amount) || 0), 0);
     const totalFixedExpense = safeExpenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
     const netMonthlyFlow = totalFixedIncome - totalFixedExpense;
@@ -54,14 +60,18 @@ export default function CuentasKathcakePage() {
                 </div>
 
                 {/* RESUMEN DE NEGOCIO */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="bg-emerald-50 border border-emerald-100 p-6 rounded-2xl shadow-sm">
-                        <h3 className="text-emerald-800 font-bold uppercase text-[10px] mb-1">Caja/Banco Negocio</h3>
-                        <p className="text-2xl font-black text-emerald-600">{formatCurrency(totalFunds, currency, currencySymbol)}</p>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="bg-emerald-50 border border-emerald-100 p-4 rounded-2xl shadow-sm">
+                        <h3 className="text-emerald-800 font-bold uppercase text-[9px] mb-1">Caja/Banco Negocio</h3>
+                        <p className="text-xl font-black text-emerald-600">{formatCurrency(totalFunds, currency, currencySymbol)}</p>
                     </div>
-                    <div className="bg-white border border-slate-100 p-6 rounded-2xl shadow-sm">
-                        <h3 className="text-slate-500 font-bold uppercase text-[10px] mb-1">Total Ventas Fijas</h3>
-                        <p className="text-2xl font-black text-slate-800">{formatCurrency(totalFixedIncome, currency, currencySymbol)}</p>
+                    <div className="bg-rose-50 border border-rose-100 p-4 rounded-2xl shadow-sm">
+                        <h3 className="text-rose-800 font-bold uppercase text-[9px] mb-1">Deuda Negocio</h3>
+                        <p className="text-xl font-black text-rose-600">{formatCurrency(totalDebt, currency, currencySymbol)}</p>
+                    </div>
+                    <div className="bg-white border border-slate-100 p-4 rounded-2xl shadow-sm">
+                        <h3 className="text-slate-500 font-bold uppercase text-[9px] mb-1">Ventas Fijas</h3>
+                        <p className="text-xl font-black text-slate-800">{formatCurrency(totalFixedIncome, currency, currencySymbol)}</p>
                     </div>
                     <div className={`p-6 rounded-2xl shadow-sm border ${netMonthlyFlow >= 0 ? 'bg-blue-50 border-blue-200' : 'bg-orange-50 border-orange-200'}`}>
                         <h3 className={`font-bold uppercase text-[10px] mb-1 ${netMonthlyFlow >= 0 ? 'text-blue-800' : 'text-orange-800'}`}>Margen Fijo Mensual</h3>
@@ -186,9 +196,9 @@ export default function CuentasKathcakePage() {
                         <section className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
                             <div className="p-4 border-b border-slate-100 bg-slate-900 text-white flex justify-between items-center">
                                 <h4 className="font-bold">Bancos & Caja Kathcake</h4>
-                                <button onClick={() => setShowAccountForm(true)} className="text-[10px] bg-pink-500 px-2 py-1 rounded font-bold">+ NUEVA CUENTA</button>
+                                <button onClick={() => { setAccountFormSection('REGULAR'); setShowAccountForm(true); }} className="text-[10px] bg-pink-500 px-2 py-1 rounded font-bold">+ NUEVA CUENTA</button>
                             </div>
-                            {showAccountForm && (
+                            {showAccountForm && accountFormSection === 'REGULAR' && (
                                 <div className="p-4 border-b"><AccountForm defaultType="BANK" defaultCategory="KATHCAKE" initialData={editingAccount} onSuccess={handleAccountSuccess} onCancel={() => setShowAccountForm(false)} /></div>
                             )}
                             <div className="p-4 grid grid-cols-1 gap-3">
@@ -200,6 +210,50 @@ export default function CuentasKathcakePage() {
                                                 <p className="font-bold text-slate-800 text-lg">{account.name}</p>
                                             </div>
                                             <span className="text-xl font-black text-slate-900">{formatCurrency(account.balance, currency, currencySymbol)}</span>
+                                        </div>
+                                    ))}
+                            </div>
+                        </section>
+
+                        {/* SECCIÓN TARJETAS KATHCAKE */}
+                        <section className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                            <div className="p-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                                <h4 className="font-bold text-slate-700">Deudas (Tarjetas Negocio)</h4>
+                                <div className="flex gap-2">
+                                    <button onClick={() => setShowCardExpenseForm(true)} className="text-[10px] bg-purple-600 text-white px-2 py-1 rounded font-bold">💳 CONSUMO</button>
+                                    <button onClick={() => { setAccountFormSection('CREDIT'); setShowAccountForm(true); }} className="text-[10px] bg-slate-200 text-slate-600 px-2 py-1 rounded font-bold">+ TARJETA</button>
+                                </div>
+                            </div>
+                            {showCardExpenseForm && (
+                                <div className="p-4 border-b"><CardExpenseForm creditCards={creditCards} onSuccess={handleCardExpenseSuccess} onCancel={() => setShowCardExpenseForm(false)} /></div>
+                            )}
+                            {showAccountForm && accountFormSection === 'CREDIT' && (
+                                <div className="p-4 border-b"><AccountForm defaultType="CREDIT" defaultCategory="KATHCAKE" initialData={editingAccount} onSuccess={handleAccountSuccess} onCancel={() => setShowAccountForm(false)} /></div>
+                            )}
+                            <div className="p-4 space-y-4">
+                                {creditCards.length === 0 ? <p className="text-center py-6 text-slate-400 text-sm italic">Sin tarjetas registradas para el negocio.</p> :
+                                    creditCards.map(card => (
+                                        <div key={card.id} className="relative p-4 rounded-2xl bg-gradient-to-br from-pink-900 to-slate-900 text-white shadow-lg overflow-hidden group">
+                                            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                                                <span className="text-6xl italic font-black">KC</span>
+                                            </div>
+                                            <div className="relative z-10 flex justify-between items-start">
+                                                <div>
+                                                    <p className="text-[10px] uppercase opacity-60 font-medium tracking-widest">{card.name}</p>
+                                                    <p className="text-xl font-black mt-1 decoration-pink-500/30 decoration-2 underline-offset-4">{formatCurrency(card.balance, currency, currencySymbol)}</p>
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className="text-[10px] uppercase opacity-60 font-medium tracking-widest">Límite</p>
+                                                    <p className="text-sm font-bold">{formatCurrency(card.limit || 0, currency, currencySymbol)}</p>
+                                                </div>
+                                            </div>
+                                            <div className="mt-4 h-2 w-full bg-white/10 rounded-full overflow-hidden border border-white/5">
+                                                <div className="h-full bg-gradient-to-r from-pink-400 to-rose-400" style={{ width: `${Math.min(100, (((card.limit || 0) - card.balance) / (card.limit || 1)) * 100)}%` }}></div>
+                                            </div>
+                                            <div className="mt-2 flex justify-between items-center opacity-70">
+                                                <p className="text-[9px] uppercase tracking-tighter">Disponible: {formatCurrency((card.limit || 0) - card.balance, currency, currencySymbol)}</p>
+                                                <button onClick={() => { setEditingAccount(card); setAccountFormSection('CREDIT'); setShowAccountForm(true); }} className="text-[9px] bg-white/10 hover:bg-white/20 px-2 py-1 rounded transition-colors">EDITAR</button>
+                                            </div>
                                         </div>
                                     ))}
                             </div>
