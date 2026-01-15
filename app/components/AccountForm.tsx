@@ -12,6 +12,7 @@ interface AccountFormProps {
 }
 
 export default function AccountForm({ initialData, onSuccess, onCancel, onDelete }: AccountFormProps) {
+    const [category, setCategory] = useState<'PERSONAL' | 'KATHCAKE'>(initialData?.category || 'PERSONAL');
     const [name, setName] = useState(initialData?.name || '');
     const [type, setType] = useState<AccountType>(initialData?.type || 'CASH');
     const [balance, setBalance] = useState(initialData?.balance?.toString() || '');
@@ -29,6 +30,7 @@ export default function AccountForm({ initialData, onSuccess, onCancel, onDelete
             name,
             type,
             balance: parseFloat(balance) || 0,
+            category,
         };
 
         if (type === 'CREDIT') {
@@ -57,16 +59,29 @@ export default function AccountForm({ initialData, onSuccess, onCancel, onDelete
         <form onSubmit={handleSubmit} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
             <h3 className="text-lg font-semibold text-slate-800">{initialData ? 'Editar Cuenta' : 'Agregar Nueva Cuenta'}</h3>
 
-            <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Nombre de la Cuenta</label>
-                <input
-                    type="text"
-                    required
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    placeholder="Ej: Banco Popular, Tarjeta Visa"
-                />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Categoría de Cuenta</label>
+                    <select
+                        value={category}
+                        onChange={(e) => setCategory(e.target.value as 'PERSONAL' | 'KATHCAKE')}
+                        className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500 bg-white"
+                    >
+                        <option value="PERSONAL">Cuentas Personales</option>
+                        <option value="KATHCAKE">Cuentas Kathcake</option>
+                    </select>
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Nombre de la Cuenta</label>
+                    <input
+                        type="text"
+                        required
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        placeholder="Ej: Banco Popular, Efectivo Kathcake"
+                    />
+                </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

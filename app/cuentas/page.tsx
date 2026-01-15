@@ -192,19 +192,18 @@ export default function CuentasPage() {
                             </div>
                         </section>
 
-                        {/* 2. DISPONIBILIDAD (CUENTAS) */}
+                        {/* 2. DISPONIBILIDAD (CUENTAS PERSONALES) */}
                         <section className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
                             <div className="p-5 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
                                 <div className="flex items-center gap-3">
                                     <div className="h-6 w-1 bg-blue-500 rounded-full"></div>
-                                    <h4 className="font-bold text-slate-700">Disponibilidad</h4>
+                                    <h4 className="font-bold text-slate-700">Cuentas Personales</h4>
                                 </div>
                                 <button onClick={() => { setEditingAccount(null); setShowAccountForm(!showAccountForm); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="text-xs bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 px-3 py-1.5 rounded-lg transition-colors font-medium">
                                     + Nueva
                                 </button>
                             </div>
 
-                            {/* Reuse Account Form just for generic accounts if needed here */}
                             {showAccountForm && !editingAccount?.type?.includes('CREDIT') && (
                                 <div className="p-6 bg-slate-50 border-b border-slate-100">
                                     <AccountForm initialData={editingAccount} onSuccess={handleAccountSuccess} onCancel={() => setShowAccountForm(false)} onDelete={removeAccount} />
@@ -212,7 +211,7 @@ export default function CuentasPage() {
                             )}
 
                             <div className="divide-y divide-slate-100">
-                                {liquidFunds.map(acc => (
+                                {liquidFunds.filter(acc => !acc.category || acc.category === 'PERSONAL').map(acc => (
                                     <div key={acc.id} className="p-4 flex justify-between items-center hover:bg-slate-50 group">
                                         <div className="flex items-center gap-3">
                                             <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm ${acc.type === 'CASH' ? 'bg-emerald-100 text-emerald-600' : 'bg-blue-100 text-blue-600'}`}>
@@ -231,7 +230,40 @@ export default function CuentasPage() {
                                         </div>
                                     </div>
                                 ))}
-                                {liquidFunds.length === 0 && <p className="p-6 text-center text-slate-400 text-sm">No tienes cuentas registradas.</p>}
+                                {liquidFunds.filter(acc => !acc.category || acc.category === 'PERSONAL').length === 0 && <p className="p-6 text-center text-slate-400 text-sm">No hay cuentas personales.</p>}
+                            </div>
+                        </section>
+
+                        {/* 2.5 DISPONIBILIDAD (CUENTAS KATHCAKE) */}
+                        <section className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                            <div className="p-5 border-b border-slate-100 bg-emerald-50 flex justify-between items-center">
+                                <div className="flex items-center gap-3">
+                                    <div className="h-6 w-1 bg-emerald-500 rounded-full"></div>
+                                    <h4 className="font-bold text-emerald-800">Cuentas Kathcake</h4>
+                                </div>
+                            </div>
+
+                            <div className="divide-y divide-slate-100">
+                                {liquidFunds.filter(acc => acc.category === 'KATHCAKE').map(acc => (
+                                    <div key={acc.id} className="p-4 flex justify-between items-center hover:bg-slate-50 group">
+                                        <div className="flex items-center gap-3">
+                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm bg-emerald-100 text-emerald-600`}>
+                                                {acc.type === 'CASH' ? '💵' : '🏦'}
+                                            </div>
+                                            <div>
+                                                <h4 className="font-bold text-slate-800 text-sm">{acc.name}</h4>
+                                                <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-600 font-medium lowercase">
+                                                    Empresa
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="text-sm font-bold text-slate-800">{formatCurrency(acc.balance, currency, currencySymbol)}</p>
+                                            <button onClick={() => { setEditingAccount(acc); setShowAccountForm(true); }} className="text-[10px] text-blue-500 hover:underline mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity">Editar</button>
+                                        </div>
+                                    </div>
+                                ))}
+                                {liquidFunds.filter(acc => acc.category === 'KATHCAKE').length === 0 && <p className="p-6 text-center text-slate-400 text-sm">No hay cuentas de Kathcake.</p>}
                             </div>
                         </section>
 

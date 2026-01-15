@@ -24,6 +24,7 @@ export interface Account {
     name: string;        // e.g., 'Caja Chica', 'Banco Mercantil'
     type: 'CASH' | 'BANK' | 'CREDIT' | 'INVESTMENT';
     balance: number;     // For Credit Cards, this is the Debt (Positive number = Debt)
+    category?: 'PERSONAL' | 'KATHCAKE';
 
     // Specific for Credit Cards
     limit?: number;        // Credit Limit
