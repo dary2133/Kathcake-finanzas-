@@ -83,7 +83,7 @@ export default function CuentasPage() {
                                 return incomeDays.map((startDay, index) => {
                                     const nextStartDay = incomeDays[(index + 1) % incomeDays.length];
                                     const isLast = index === incomeDays.length - 1;
-                                    const rangeLabel = isLast ? `Día ${startDay} al ${nextStartDay > 1 ? nextStartDay - 1 : 30}` : `Día ${startDay} al ${nextStartDay - 1}`;
+                                    const rangeLabel = isLast ? `Periodo: Día ${startDay} al ${nextStartDay > 1 ? nextStartDay - 1 : 30} (prox. mes)` : `Periodo: Día ${startDay} al ${nextStartDay - 1}`;
 
                                     const periodIncome = safeIncomes.filter(i => (i.paymentDay || 1) === startDay).reduce((sum, i) => sum + (Number(i.amount) || 0), 0);
 
@@ -95,28 +95,33 @@ export default function CuentasPage() {
 
                                     const periodExpenseTotal = expensesInPeriod.reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
                                     const balance = periodIncome - periodExpenseTotal;
+                                    const expenseNames = expensesInPeriod.map(e => e.name).join(', ');
 
                                     return (
-                                        <div key={startDay} className="bg-white/60 p-2 rounded-lg border border-slate-100 shadow-sm">
-                                            <div className="flex justify-between items-center mb-1">
-                                                <span className="font-bold text-slate-700">{rangeLabel}</span>
-                                                <span className={`font-bold ${balance >= 0 ? 'text-blue-600' : 'text-orange-500'}`}>
-                                                    {formatCurrency(balance, currency, currencySymbol)}
+                                        <div key={startDay} className="bg-white/60 p-3 rounded-xl border border-slate-100 shadow-sm relative group/period">
+                                            <div className="flex justify-between items-start mb-2">
+                                                <span className="font-bold text-slate-700 text-[11px] uppercase tracking-tight">{rangeLabel}</span>
+                                                <span className={`font-bold text-[11px] ${balance >= 0 ? 'text-blue-600' : 'text-orange-500'}`}>
+                                                    Dispo: {formatCurrency(balance, currency, currencySymbol)}
                                                 </span>
                                             </div>
-                                            <div className="grid grid-cols-2 gap-2 text-[10px]">
-                                                <p className="text-emerald-600 font-medium">+{formatCurrency(periodIncome, currency, currencySymbol)}</p>
+
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div className="space-y-0.5">
+                                                    <p className="text-emerald-600 font-bold text-[10px]">Ingresos (+{formatCurrency(periodIncome, currency, currencySymbol)})</p>
+                                                </div>
                                                 <div className="relative group/tooltip text-right">
-                                                    <p className="text-rose-500 font-medium cursor-help hover:underline decoration-dotted">-{formatCurrency(periodExpenseTotal, currency, currencySymbol)}</p>
+                                                    <p className="text-rose-500 font-bold text-[10px] cursor-help">Gastos (-{formatCurrency(periodExpenseTotal, currency, currencySymbol)})</p>
+                                                    <p className="text-[9px] text-slate-400 truncate mt-0.5">{expenseNames || 'Sin gastos'}</p>
 
                                                     {expensesInPeriod.length > 0 && (
-                                                        <div className="absolute right-0 bottom-full mb-2 hidden group-hover/tooltip:block bg-slate-900 text-white p-2 rounded-lg shadow-xl z-50 min-w-[180px] text-left border border-slate-700">
-                                                            <p className="font-bold border-b border-white/10 mb-1 pb-1 text-[9px] uppercase tracking-wider text-slate-400">Desglose del periodo:</p>
-                                                            <div className="max-h-[120px] overflow-y-auto space-y-1">
+                                                        <div className="absolute right-0 bottom-full mb-2 hidden group-hover/tooltip:block bg-slate-900 text-white p-3 rounded-xl shadow-2xl z-50 min-w-[220px] text-left border border-slate-700 backdrop-blur-md">
+                                                            <p className="font-bold border-b border-white/10 mb-2 pb-1 text-[10px] uppercase tracking-widest text-slate-400">Desglose del periodo:</p>
+                                                            <div className="max-h-[150px] overflow-y-auto space-y-1.5 pr-1">
                                                                 {expensesInPeriod.map(e => (
-                                                                    <div key={e.id} className="flex justify-between gap-2">
-                                                                        <span className="truncate max-w-[100px]">{e.name}</span>
-                                                                        <span className="font-mono text-rose-300">{formatCurrency(e.amount, currency, currencySymbol)}</span>
+                                                                    <div key={e.id} className="flex justify-between gap-4 text-[10px]">
+                                                                        <span className="text-slate-300 font-medium">{e.name}</span>
+                                                                        <span className="font-mono text-rose-300 font-bold">{formatCurrency(e.amount, currency, currencySymbol)}</span>
                                                                     </div>
                                                                 ))}
                                                             </div>
