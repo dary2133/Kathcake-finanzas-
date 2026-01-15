@@ -10,12 +10,13 @@ interface AccountFormProps {
     onCancel?: () => void;
     onDelete?: (id: string | number) => void;
     defaultCategory?: 'PERSONAL' | 'KATHCAKE';
+    defaultType?: AccountType;
 }
 
-export default function AccountForm({ initialData, onSuccess, onCancel, onDelete, defaultCategory }: AccountFormProps) {
+export default function AccountForm({ initialData, onSuccess, onCancel, onDelete, defaultCategory, defaultType }: AccountFormProps) {
     const [category, setCategory] = useState<'PERSONAL' | 'KATHCAKE'>(initialData?.category || defaultCategory || 'PERSONAL');
     const [name, setName] = useState(initialData?.name || '');
-    const [type, setType] = useState<AccountType>(initialData?.type || 'CASH');
+    const [type, setType] = useState<AccountType>(initialData?.type || defaultType || 'CASH');
     const [balance, setBalance] = useState(initialData?.balance?.toString() || '');
     const [limit, setLimit] = useState(initialData?.limit?.toString() || '');
     const [cutoffDay, setCutoffDay] = useState(initialData?.cutoffDay?.toString() || '');
