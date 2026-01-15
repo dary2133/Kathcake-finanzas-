@@ -96,7 +96,7 @@ export default function FixedIncomeForm({ initialData, onSuccess, onCancel, onDe
                     />
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Día de Cobro</label>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Fecha de Cobro</label>
                     <input
                         type="date"
                         required
@@ -104,6 +104,9 @@ export default function FixedIncomeForm({ initialData, onSuccess, onCancel, onDe
                         onChange={(e) => setPaymentDate(e.target.value)}
                         className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     />
+                    <p className="text-[10px] text-slate-400 mt-1">
+                        Selecciona un día ejemplo (ej: 5 o 20). El sistema repetirá este ingreso ese día de cada mes.
+                    </p>
                 </div>
             </div>
 
