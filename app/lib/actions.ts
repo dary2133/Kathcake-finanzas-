@@ -177,12 +177,16 @@ export async function deleteTransaction(id: string) {
 // FIXED EXPENSES
 export async function getFixedExpenses(): Promise<FixedExpense[]> {
     try {
+        // Lazy migration: Ensure column exists
+        await sql`ALTER TABLE fixed_expenses ADD COLUMN IF NOT EXISTS start_date DATE`;
+
         const { rows } = await sql<any>`SELECT * FROM fixed_expenses ORDER BY name ASC`;
         return rows.map(row => ({
             id: row.id,
             name: row.name,
             amount: parseFloat(row.amount),
-            paymentLimitDay: row.payment_limit_day
+            paymentLimitDay: row.payment_limit_day,
+            startDate: row.start_date ? row.start_date.toISOString().split('T')[0] : undefined
         }));
     } catch (error) {
         console.error('Failed to fetch fixed expenses:', error);
@@ -193,8 +197,8 @@ export async function getFixedExpenses(): Promise<FixedExpense[]> {
 export async function addFixedExpense(e: FixedExpense) {
     try {
         await sql`
-            INSERT INTO fixed_expenses (id, name, amount, payment_limit_day)
-            VALUES (${e.id}, ${e.name}, ${e.amount}, ${e.paymentLimitDay || null})
+            INSERT INTO fixed_expenses (id, name, amount, payment_limit_day, start_date)
+            VALUES (${e.id}, ${e.name}, ${e.amount}, ${e.paymentLimitDay || null}, ${e.startDate || null})
         `;
         revalidatePath('/cuentas');
     } catch (error) {
@@ -208,7 +212,8 @@ export async function updateFixedExpense(e: FixedExpense) {
             UPDATE fixed_expenses 
             SET name = ${e.name}, 
                 amount = ${e.amount}, 
-                payment_limit_day = ${e.paymentLimitDay || null}
+                payment_limit_day = ${e.paymentLimitDay || null},
+                start_date = ${e.startDate || null}
             WHERE id = ${e.id}
         `;
         revalidatePath('/cuentas');

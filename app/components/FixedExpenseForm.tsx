@@ -17,6 +17,7 @@ export default function FixedExpenseForm({ initialData, onSuccess, onCancel, onD
 
     // Initialize date: Create a date object matching the next payment occurrence
     const calculateInitialDate = () => {
+        if (initialData?.startDate) return initialData.startDate;
         if (!initialData?.paymentLimitDay) return new Date().toISOString().split('T')[0];
 
         const today = new Date();
@@ -58,6 +59,7 @@ export default function FixedExpenseForm({ initialData, onSuccess, onCancel, onD
             name,
             amount: parseFloat(amount),
             paymentLimitDay: dayPart,
+            startDate: paymentDate, // Save the full date chosen
         };
 
         if (initialData) {

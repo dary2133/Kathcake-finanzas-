@@ -131,19 +131,32 @@ export default function CuentasPage() {
 
                             <div className="divide-y divide-slate-100 flex-grow">
                                 {fixedExpenses.map(exp => {
-                                    // Calculate Next Payment Date
+                                    // Calculate Next Payment Date intelligently
                                     const today = new Date();
-                                    const day = exp.paymentLimitDay || 1;
-                                    let targetMonth = today.getMonth();
-                                    let targetYear = today.getFullYear();
+                                    today.setHours(0, 0, 0, 0); // Normalize today to midnight
 
-                                    if (day < today.getDate()) {
-                                        targetMonth++;
-                                        if (targetMonth > 11) { targetMonth = 0; targetYear++; }
+                                    let targetDate: Date;
+
+                                    if (exp.startDate) {
+                                        // If we have a specific start date (e.g. Feb 18)
+                                        const startDate = new Date(exp.startDate + 'T12:00:00'); // Force noon to avoid TZ issues
+                                        targetDate = new Date(startDate);
+
+                                        // If start date is in the past, add months until it's future or today
+                                        while (targetDate < today) {
+                                            targetDate.setMonth(targetDate.getMonth() + 1);
+                                        }
+                                    } else {
+                                        // Legacy: fall back to day only
+                                        const day = exp.paymentLimitDay || 1;
+                                        targetDate = new Date(today.getFullYear(), today.getMonth(), day);
+                                        if (targetDate < today) {
+                                            targetDate.setMonth(targetDate.getMonth() + 1);
+                                        }
                                     }
-                                    const nextDate = new Date(targetYear, targetMonth, day);
-                                    const dateString = nextDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'long' });
-                                    const daysLeft = Math.ceil((nextDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+                                    const dateString = targetDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'long' });
+                                    const daysLeft = Math.ceil((targetDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
                                     const isUrgent = daysLeft <= 5 && daysLeft >= 0;
 
                                     return (

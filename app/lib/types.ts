@@ -43,6 +43,7 @@ export interface FixedExpense {
     name: string;      // e.g. "Alquiler Casa", "Energia Electrica"
     amount: number;
     paymentLimitDay?: number; // e.g. 5 (means 5th of each month)
+    startDate?: string; // ISO Date (YYYY-MM-DD) indicating the first payment or anchor date
 }
 
 export interface FixedIncome {
