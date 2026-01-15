@@ -5,6 +5,7 @@ import Layout from '../components/Layout';
 import AccountForm from '../components/AccountForm';
 import FixedExpenseForm from '../components/FixedExpenseForm';
 import FixedIncomeForm from '../components/FixedIncomeForm';
+import CardExpenseForm from '../components/CardExpenseForm';
 import { useAccounts, useSettings, useFixedExpenses, useFixedIncomes } from '../lib/hooks';
 import { formatCurrency } from '../lib/utils';
 import { Account, FixedExpense, FixedIncome } from '../lib/types';
@@ -22,24 +23,24 @@ export default function CuentasPage() {
     const [editingFixedIncome, setEditingFixedIncome] = useState<FixedIncome | null>(null);
 
     const [showAccountForm, setShowAccountForm] = useState(false);
+    const [showCardExpenseForm, setShowCardExpenseForm] = useState(false);
     const [showFixedExpenseForm, setShowFixedExpenseForm] = useState(false);
     const [showFixedIncomeForm, setShowFixedIncomeForm] = useState(false);
 
-    // Group Accounts
+    // Handlers
+    const handleAccountSuccess = () => { setShowAccountForm(false); setEditingAccount(null); refreshAccounts(); };
+    const handleCardExpenseSuccess = () => { setShowCardExpenseForm(false); refreshAccounts(); };
+    const handleFixedExpenseSuccess = () => { setShowFixedExpenseForm(false); setEditingFixedExpense(null); refreshFixedExpenses(); };
+    const handleFixedIncomeSuccess = () => { setShowFixedIncomeForm(false); setEditingFixedIncome(null); refreshFixedIncomes(); };
+
+    // Group Accounts & Totals
     const liquidFunds = accounts.filter(a => a.type === 'CASH' || a.type === 'BANK' || a.type === 'INVESTMENT');
     const creditCards = accounts.filter(a => a.type === 'CREDIT');
-
-    // Totals
     const totalFunds = liquidFunds.reduce((sum, a) => sum + a.balance, 0);
     const totalDebt = creditCards.reduce((sum, a) => sum + a.balance, 0);
     const totalFixedIncome = fixedIncomes.reduce((sum, i) => sum + i.amount, 0);
     const totalFixedExpense = fixedExpenses.reduce((sum, e) => sum + e.amount, 0);
     const netMonthlyFlow = totalFixedIncome - totalFixedExpense;
-
-    // Handlers
-    const handleAccountSuccess = () => { setShowAccountForm(false); setEditingAccount(null); refreshAccounts(); };
-    const handleFixedExpenseSuccess = () => { setShowFixedExpenseForm(false); setEditingFixedExpense(null); refreshFixedExpenses(); };
-    const handleFixedIncomeSuccess = () => { setShowFixedIncomeForm(false); setEditingFixedIncome(null); refreshFixedIncomes(); };
 
     return (
         <Layout>
@@ -208,14 +209,23 @@ export default function CuentasPage() {
                         </div>
 
                         <div className="space-y-4">
-                            <div className="flex justify-end">
-                                <button onClick={() => { setEditingAccount(null); setShowAccountForm(true); }} className="text-sm text-purple-600 font-medium hover:underline">
-                                    + Registrar Nueva Tarjeta
+                            <div className="flex justify-end gap-3">
+                                <button onClick={() => { setShowCardExpenseForm(!showCardExpenseForm); setShowAccountForm(false); }} className="text-sm px-4 py-2 bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold rounded-xl transition-colors shadow-sm">
+                                    💳 Registrar Consumo
+                                </button>
+                                <button onClick={() => { setEditingAccount(null); setShowAccountForm(true); setShowCardExpenseForm(false); }} className="text-sm text-slate-500 font-medium hover:underline flex items-center">
+                                    + Nueva Tarjeta
                                 </button>
                             </div>
 
+                            {showCardExpenseForm && (
+                                <div className="mb-6 animate-fade-in-down">
+                                    <CardExpenseForm creditCards={creditCards} onSuccess={handleCardExpenseSuccess} onCancel={() => setShowCardExpenseForm(false)} />
+                                </div>
+                            )}
+
                             {showAccountForm && (editingAccount?.type === 'CREDIT' || (!editingAccount && showAccountForm)) && (
-                                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 mb-4">
+                                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 mb-4 animate-fade-in-down">
                                     <AccountForm initialData={editingAccount} onSuccess={handleAccountSuccess} onCancel={() => setShowAccountForm(false)} onDelete={removeAccount} />
                                 </div>
                             )}
@@ -258,9 +268,9 @@ export default function CuentasPage() {
                                     <div className="mt-4 pt-4 border-t border-dashed border-slate-100">
                                         <div className="flex justify-between items-center">
                                             <p className="text-xs text-slate-400 italic">
-                                                Revisa "Gastos" para ver detalles de consumo.
+                                                Tus consumos se reflejan en Gastos.
                                             </p>
-                                            <button onClick={() => { setEditingAccount(card); setShowAccountForm(true); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="text-xs px-3 py-1 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-lg transition-colors font-medium">
+                                            <button onClick={() => { setEditingAccount(card); setShowAccountForm(true); setShowCardExpenseForm(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="text-xs px-3 py-1 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-lg transition-colors font-medium">
                                                 Editar Saldo / Fechas
                                             </button>
                                         </div>

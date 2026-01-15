@@ -99,6 +99,30 @@ export async function addTransaction(t: Transaction) {
     }
 }
 
+export async function registerCardExpense(t: Transaction, accountId: string) {
+    try {
+        // 1. Add Transaction
+        await sql`
+            INSERT INTO transactions (id, date, type, category, description, amount, payment_method, status, location, due_date)
+            VALUES (${t.id}, ${t.date}, ${t.type}, ${t.category}, ${t.description}, ${t.amount}, ${t.paymentMethod}, ${t.status}, ${t.location || null}, ${t.dueDate || null})
+        `;
+
+        // 2. Update Account Balance (Increase Debt)
+        await sql`
+            UPDATE accounts 
+            SET balance = balance + ${t.amount}
+            WHERE id = ${accountId}
+        `;
+
+        revalidatePath('/cuentas');
+        revalidatePath('/gastos');
+        revalidatePath('/');
+    } catch (error) {
+        console.error('Failed to register card expense:', error);
+        throw error;
+    }
+}
+
 export async function addTransactions(list: Transaction[]) {
     try {
         for (const t of list) {
