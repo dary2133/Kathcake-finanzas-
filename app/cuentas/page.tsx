@@ -193,7 +193,7 @@ export default function CuentasPage() {
                         </section>
 
                         {/* 2. DISPONIBILIDAD (CUENTAS PERSONALES) */}
-                        <section className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                        <section id="personales" className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
                             <div className="p-5 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
                                 <div className="flex items-center gap-3">
                                     <div className="h-6 w-1 bg-blue-500 rounded-full"></div>
@@ -235,7 +235,7 @@ export default function CuentasPage() {
                         </section>
 
                         {/* 2.5 DISPONIBILIDAD (CUENTAS KATHCAKE) */}
-                        <section className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                        <section id="kathcake" className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
                             <div className="p-5 border-b border-slate-100 bg-emerald-50 flex justify-between items-center">
                                 <div className="flex items-center gap-3">
                                     <div className="h-6 w-1 bg-emerald-500 rounded-full"></div>
