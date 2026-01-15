@@ -117,10 +117,25 @@ export default function CuentasPage() {
                                                 <div>
                                                     <span className="block text-emerald-600 font-medium">Ingresos (+{formatCurrency(periodIncome, currency, currencySymbol)})</span>
                                                 </div>
-                                                <div>
-                                                    <span className="block text-rose-500 font-medium">Gastos (-{formatCurrency(periodExpenseTotal, currency, currencySymbol)})</span>
+                                                <div className="relative group/tooltip">
+                                                    <span className="block text-rose-500 font-medium cursor-help">
+                                                        Gastos (-{formatCurrency(periodExpenseTotal, currency, currencySymbol)})
+                                                    </span>
                                                     {expensesInPeriod.length > 0 && (
-                                                        <span className="block truncate opacity-75" title={expenseNames}>{expenseNames}</span>
+                                                        <>
+                                                            <span className="block truncate opacity-75">{expenseNames}</span>
+                                                            {/* Tooltip on Hover */}
+                                                            <div className="absolute left-0 bottom-full mb-2 hidden group-hover/tooltip:block bg-slate-800 text-white text-[10px] p-2 rounded-lg shadow-xl z-50 min-w-[200px] border border-slate-700">
+                                                                <p className="font-bold border-b border-slate-600 mb-1 pb-1">Desglose del periodo:</p>
+                                                                {expensesInPeriod.map(e => (
+                                                                    <div key={e.id} className="flex justify-between gap-4 py-0.5">
+                                                                        <span>{e.name}</span>
+                                                                        <span className="font-mono text-rose-300">{formatCurrency(e.amount, currency, currencySymbol)}</span>
+                                                                    </div>
+                                                                ))}
+                                                                <div className="absolute top-full left-4 w-2 h-2 bg-slate-800 rotate-45 -translate-y-1"></div>
+                                                            </div>
+                                                        </>
                                                     )}
                                                 </div>
                                             </div>
