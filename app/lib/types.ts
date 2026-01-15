@@ -11,6 +11,7 @@ export interface Transaction {
     amount: number;
     attachmentUrl?: string; // URL or base64 of uploaded PDF/JPG/Excel
     paymentMethod: string;   // 'Tarjeta', 'Efectivo', 'Transferencia'
+    transactionCategory?: 'PERSONAL' | 'KATHCAKE';
 
     // Specific fields found in Sheet
     location?: string;       // Matches 'UBICACION' (e.g., Bank, Cash Box)
@@ -45,6 +46,7 @@ export interface FixedExpense {
     amount: number;
     paymentLimitDay?: number; // e.g. 5 (means 5th of each month)
     startDate?: string; // ISO Date (YYYY-MM-DD) indicating the first payment or anchor date
+    category?: 'PERSONAL' | 'KATHCAKE';
 }
 
 export interface FixedIncome {
@@ -52,6 +54,7 @@ export interface FixedIncome {
     name: string;      // e.g. "Salario", "Alquiler Local"
     amount: number;
     paymentDay?: number; // e.g. 15 or 30
+    category?: 'PERSONAL' | 'KATHCAKE';
 }
 
 export interface ParsedRecord {

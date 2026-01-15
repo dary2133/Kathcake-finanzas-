@@ -11,9 +11,10 @@ interface TransactionFormProps {
     onSuccess: () => void;
     onCancel?: () => void;
     onDelete?: (id: string | number) => void;
+    defaultCategory?: 'PERSONAL' | 'KATHCAKE';
 }
 
-export default function TransactionForm({ type, initialData, onSuccess, onCancel, onDelete }: TransactionFormProps) {
+export default function TransactionForm({ type, initialData, onSuccess, onCancel, onDelete, defaultCategory }: TransactionFormProps) {
     const { settings } = useSettings();
     const { currencySymbol } = settings;
 
@@ -25,6 +26,7 @@ export default function TransactionForm({ type, initialData, onSuccess, onCancel
     const [status, setStatus] = useState<'PAID' | 'PENDING'>(initialData?.status || 'PAID');
     const [location, setLocation] = useState(initialData?.location || '');
     const [dueDate, setDueDate] = useState(initialData?.dueDate || '');
+    const [transactionCategory, setTransactionCategory] = useState<'PERSONAL' | 'KATHCAKE'>(initialData?.transactionCategory || defaultCategory || 'PERSONAL');
 
     // Synchronize form with initialData when it changes (essential for editing different transactions)
     useEffect(() => {
@@ -37,6 +39,7 @@ export default function TransactionForm({ type, initialData, onSuccess, onCancel
             setStatus(initialData.status);
             setLocation(initialData.location || '');
             setDueDate(initialData.dueDate || '');
+            setTransactionCategory(initialData.transactionCategory || 'PERSONAL');
         } else {
             // Reset for new entry
             setAmount('');
@@ -47,8 +50,9 @@ export default function TransactionForm({ type, initialData, onSuccess, onCancel
             setStatus('PAID');
             setLocation('');
             setDueDate('');
+            setTransactionCategory(defaultCategory || 'PERSONAL');
         }
-    }, [initialData]);
+    }, [initialData, defaultCategory]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -66,6 +70,7 @@ export default function TransactionForm({ type, initialData, onSuccess, onCancel
             status,
             location: location || undefined,
             dueDate: dueDate || undefined,
+            transactionCategory,
         };
 
         if (initialData) {
@@ -114,6 +119,25 @@ export default function TransactionForm({ type, initialData, onSuccess, onCancel
             <h3 className="text-lg font-semibold text-slate-800">
                 {initialData ? 'Editar ' : 'Registrar '} {type === 'EXPENSE' ? 'Gasto' : 'Ingreso'}
             </h3>
+
+            {!defaultCategory && (
+                <div className="flex bg-slate-100 p-1 rounded-xl">
+                    <button
+                        type="button"
+                        onClick={() => setTransactionCategory('PERSONAL')}
+                        className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${transactionCategory === 'PERSONAL' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                    >
+                        🏠 Personal
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setTransactionCategory('KATHCAKE')}
+                        className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${transactionCategory === 'KATHCAKE' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                    >
+                        🎂 Kathcake
+                    </button>
+                </div>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>

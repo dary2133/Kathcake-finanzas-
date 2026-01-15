@@ -8,6 +8,7 @@ import { Transaction, Account, FixedExpense, FixedIncome, AppSettings, Transacti
 // ACCOUNTS
 export async function getAccounts(): Promise<Account[]> {
     try {
+        await sql`ALTER TABLE accounts ADD COLUMN IF NOT EXISTS category TEXT DEFAULT 'PERSONAL'`;
         const { rows } = await sql<any>`SELECT * FROM accounts ORDER BY name ASC`;
         return rows.map(row => ({
             id: row.id,
@@ -16,7 +17,8 @@ export async function getAccounts(): Promise<Account[]> {
             balance: parseFloat(row.balance),
             limit: row.limit ? parseFloat(row.limit) : undefined,
             cutoffDay: row.cutoff_day,
-            paymentLimitDay: row.payment_limit_day
+            paymentLimitDay: row.payment_limit_day,
+            category: row.category as 'PERSONAL' | 'KATHCAKE'
         }));
     } catch (error) {
         console.error('Failed to fetch accounts:', error);
@@ -27,10 +29,11 @@ export async function getAccounts(): Promise<Account[]> {
 export async function addAccount(account: Account) {
     try {
         await sql`
-            INSERT INTO accounts (id, name, type, balance, "limit", cutoff_day, payment_limit_day)
-            VALUES (${account.id}, ${account.name}, ${account.type}, ${account.balance}, ${account.limit || null}, ${account.cutoffDay || null}, ${account.paymentLimitDay || null})
+            INSERT INTO accounts (id, name, type, balance, "limit", cutoff_day, payment_limit_day, category)
+            VALUES (${account.id}, ${account.name}, ${account.type}, ${account.balance}, ${account.limit || null}, ${account.cutoffDay || null}, ${account.paymentLimitDay || null}, ${account.category || 'PERSONAL'})
         `;
         revalidatePath('/cuentas');
+        revalidatePath('/cuentas-kathcake');
     } catch (error) {
         console.error('Failed to add account:', error);
     }
@@ -45,10 +48,12 @@ export async function updateAccount(account: Account) {
                 balance = ${account.balance}, 
                 "limit" = ${account.limit || null}, 
                 cutoff_day = ${account.cutoffDay || null}, 
-                payment_limit_day = ${account.paymentLimitDay || null}
+                payment_limit_day = ${account.paymentLimitDay || null},
+                category = ${account.category || 'PERSONAL'}
             WHERE id = ${account.id}
         `;
         revalidatePath('/cuentas');
+        revalidatePath('/cuentas-kathcake');
     } catch (error) {
         console.error('Failed to update account:', error);
     }
@@ -66,6 +71,7 @@ export async function deleteAccount(id: string) {
 // TRANSACTIONS
 export async function getTransactions(): Promise<Transaction[]> {
     try {
+        await sql`ALTER TABLE transactions ADD COLUMN IF NOT EXISTS transaction_category TEXT DEFAULT 'PERSONAL'`;
         const { rows } = await sql<any>`SELECT * FROM transactions ORDER BY date DESC, id DESC`;
         return rows.map(row => ({
             id: row.id,
@@ -77,7 +83,8 @@ export async function getTransactions(): Promise<Transaction[]> {
             paymentMethod: row.payment_method,
             status: row.status as 'PAID' | 'PENDING',
             location: row.location,
-            dueDate: row.due_date ? row.due_date.toISOString().split('T')[0] : undefined
+            dueDate: row.due_date ? row.due_date.toISOString().split('T')[0] : undefined,
+            transactionCategory: row.transaction_category as 'PERSONAL' | 'KATHCAKE'
         }));
     } catch (error) {
         console.error('Failed to fetch transactions:', error);
@@ -88,8 +95,8 @@ export async function getTransactions(): Promise<Transaction[]> {
 export async function addTransaction(t: Transaction) {
     try {
         await sql`
-            INSERT INTO transactions (id, date, type, category, description, amount, payment_method, status, location, due_date)
-            VALUES (${t.id}, ${t.date}, ${t.type}, ${t.category}, ${t.description}, ${t.amount}, ${t.paymentMethod}, ${t.status}, ${t.location || null}, ${t.dueDate || null})
+            INSERT INTO transactions (id, date, type, category, description, amount, payment_method, status, location, due_date, transaction_category)
+            VALUES (${t.id}, ${t.date}, ${t.type}, ${t.category}, ${t.description}, ${t.amount}, ${t.paymentMethod}, ${t.status}, ${t.location || null}, ${t.dueDate || null}, ${t.transactionCategory || 'PERSONAL'})
         `;
         revalidatePath('/ingresos');
         revalidatePath('/gastos');
@@ -127,8 +134,8 @@ export async function addTransactions(list: Transaction[]) {
     try {
         for (const t of list) {
             await sql`
-                INSERT INTO transactions (id, date, type, category, description, amount, payment_method, status, location, due_date)
-                VALUES (${t.id}, ${t.date}, ${t.type}, ${t.category}, ${t.description}, ${t.amount}, ${t.paymentMethod}, ${t.status}, ${t.location || null}, ${t.dueDate || null})
+                INSERT INTO transactions (id, date, type, category, description, amount, payment_method, status, location, due_date, transaction_category)
+                VALUES (${t.id}, ${t.date}, ${t.type}, ${t.category}, ${t.description}, ${t.amount}, ${t.paymentMethod}, ${t.status}, ${t.location || null}, ${t.dueDate || null}, ${t.transactionCategory || 'PERSONAL'})
                 ON CONFLICT (id) DO NOTHING
             `;
         }
@@ -152,7 +159,8 @@ export async function updateTransaction(t: Transaction) {
                 payment_method = ${t.paymentMethod}, 
                 status = ${t.status}, 
                 location = ${t.location || null}, 
-                due_date = ${t.dueDate || null}
+                due_date = ${t.dueDate || null},
+                transaction_category = ${t.transactionCategory || 'PERSONAL'}
             WHERE id = ${t.id}
         `;
         revalidatePath('/ingresos');
@@ -179,6 +187,7 @@ export async function getFixedExpenses(): Promise<FixedExpense[]> {
     try {
         // Lazy migration: Ensure column exists
         await sql`ALTER TABLE fixed_expenses ADD COLUMN IF NOT EXISTS start_date DATE`;
+        await sql`ALTER TABLE fixed_expenses ADD COLUMN IF NOT EXISTS category TEXT DEFAULT 'PERSONAL'`;
 
         const { rows } = await sql<any>`SELECT * FROM fixed_expenses ORDER BY name ASC`;
         return rows.map(row => ({
@@ -186,7 +195,8 @@ export async function getFixedExpenses(): Promise<FixedExpense[]> {
             name: row.name,
             amount: parseFloat(row.amount),
             paymentLimitDay: row.payment_limit_day,
-            startDate: row.start_date ? row.start_date.toISOString().split('T')[0] : undefined
+            startDate: row.start_date ? row.start_date.toISOString().split('T')[0] : undefined,
+            category: row.category as 'PERSONAL' | 'KATHCAKE'
         }));
     } catch (error) {
         console.error('Failed to fetch fixed expenses:', error);
@@ -197,10 +207,11 @@ export async function getFixedExpenses(): Promise<FixedExpense[]> {
 export async function addFixedExpense(e: FixedExpense) {
     try {
         await sql`
-            INSERT INTO fixed_expenses (id, name, amount, payment_limit_day, start_date)
-            VALUES (${e.id}, ${e.name}, ${e.amount}, ${e.paymentLimitDay || null}, ${e.startDate || null})
+            INSERT INTO fixed_expenses (id, name, amount, payment_limit_day, start_date, category)
+            VALUES (${e.id}, ${e.name}, ${e.amount}, ${e.paymentLimitDay || null}, ${e.startDate || null}, ${e.category || 'PERSONAL'})
         `;
         revalidatePath('/cuentas');
+        revalidatePath('/cuentas-kathcake');
     } catch (error) {
         console.error('Failed to add fixed expense:', error);
     }
@@ -213,10 +224,12 @@ export async function updateFixedExpense(e: FixedExpense) {
             SET name = ${e.name}, 
                 amount = ${e.amount}, 
                 payment_limit_day = ${e.paymentLimitDay || null},
-                start_date = ${e.startDate || null}
+                start_date = ${e.startDate || null},
+                category = ${e.category || 'PERSONAL'}
             WHERE id = ${e.id}
         `;
         revalidatePath('/cuentas');
+        revalidatePath('/cuentas-kathcake');
     } catch (error) {
         console.error('Failed to update fixed expense:', error);
     }
@@ -238,15 +251,18 @@ export async function getFixedIncomes(): Promise<FixedIncome[]> {
             id TEXT PRIMARY KEY, 
             name TEXT NOT NULL, 
             amount DECIMAL(10,2) NOT NULL, 
-            payment_day INTEGER
+            payment_day INTEGER,
+            category TEXT DEFAULT 'PERSONAL'
         )`;
+        await sql`ALTER TABLE fixed_incomes ADD COLUMN IF NOT EXISTS category TEXT DEFAULT 'PERSONAL'`;
 
         const { rows } = await sql<any>`SELECT * FROM fixed_incomes ORDER BY name ASC`;
         return rows.map(row => ({
             id: row.id,
             name: row.name,
             amount: parseFloat(row.amount),
-            paymentDay: row.payment_day
+            paymentDay: row.payment_day,
+            category: row.category as 'PERSONAL' | 'KATHCAKE'
         }));
     } catch (error) {
         console.error('Failed to fetch fixed incomes:', error);
@@ -257,10 +273,11 @@ export async function getFixedIncomes(): Promise<FixedIncome[]> {
 export async function addFixedIncome(i: FixedIncome) {
     try {
         await sql`
-            INSERT INTO fixed_incomes (id, name, amount, payment_day)
-            VALUES (${i.id}, ${i.name}, ${i.amount}, ${i.paymentDay || null})
+            INSERT INTO fixed_incomes (id, name, amount, payment_day, category)
+            VALUES (${i.id}, ${i.name}, ${i.amount}, ${i.paymentDay || null}, ${i.category || 'PERSONAL'})
         `;
         revalidatePath('/cuentas');
+        revalidatePath('/cuentas-kathcake');
     } catch (error) {
         console.error('Failed to add fixed income:', error);
     }
@@ -272,10 +289,12 @@ export async function updateFixedIncome(i: FixedIncome) {
             UPDATE fixed_incomes 
             SET name = ${i.name}, 
                 amount = ${i.amount}, 
-                payment_day = ${i.paymentDay || null}
+                payment_day = ${i.paymentDay || null},
+                category = ${i.category || 'PERSONAL'}
             WHERE id = ${i.id}
         `;
         revalidatePath('/cuentas');
+        revalidatePath('/cuentas-kathcake');
     } catch (error) {
         console.error('Failed to update fixed income:', error);
     }

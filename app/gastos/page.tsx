@@ -9,13 +9,14 @@ import { formatCurrency } from '@/app/lib/utils';
 import { Transaction } from '../lib/types';
 
 export default function GastosPage() {
-    const { transactions, loading, refreshTransactions, removeTransaction, resetTransactions } = useTransactions();
+    const { transactions, loading, refreshTransactions, removeTransaction } = useTransactions();
     const { settings } = useSettings();
     const { currencySymbol } = settings;
     const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
     const [isManageMode, setIsManageMode] = useState(false);
+    const [transactionCategory, setTransactionCategory] = useState<'PERSONAL' | 'KATHCAKE'>('PERSONAL');
 
-    const expenses = transactions.filter(t => t.type === 'EXPENSE');
+    const expenses = transactions.filter(t => t.type === 'EXPENSE' && t.transactionCategory === transactionCategory);
 
     const handleSuccess = () => {
         refreshTransactions();
@@ -25,12 +26,28 @@ export default function GastosPage() {
     return (
         <Layout>
             <div className="space-y-6">
-                <div className="flex justify-between items-center">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     <div>
-                        <h2 className="text-2xl font-bold text-slate-800">Gastos</h2>
+                        <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                            {transactionCategory === 'KATHCAKE' ? '🎂 Gastos Kathcake' : '🏠 Gastos Personales'}
+                        </h2>
                         <p className="text-slate-500">Registra y controla tus salidas de dinero.</p>
                     </div>
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-4 w-full md:w-auto">
+                        <div className="flex bg-slate-100 p-1 rounded-xl w-full md:w-auto">
+                            <button
+                                onClick={() => setTransactionCategory('PERSONAL')}
+                                className={`flex-1 md:flex-none px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${transactionCategory === 'PERSONAL' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                            >
+                                Personal
+                            </button>
+                            <button
+                                onClick={() => setTransactionCategory('KATHCAKE')}
+                                className={`flex-1 md:flex-none px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${transactionCategory === 'KATHCAKE' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                            >
+                                Kathcake
+                            </button>
+                        </div>
                         <button
                             onClick={() => {
                                 setIsManageMode(!isManageMode);
@@ -48,14 +65,15 @@ export default function GastosPage() {
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
                     <div className="lg:col-span-1 lg:sticky lg:top-24 space-y-4">
-                        <div className="bg-rose-600 text-white p-4 rounded-2xl shadow-sm text-center">
-                            <p className="text-rose-100 text-xs font-medium uppercase tracking-wider mb-1">Total Gastos</p>
+                        <div className={`${transactionCategory === 'KATHCAKE' ? 'bg-rose-600' : 'bg-blue-600'} text-white p-4 rounded-2xl shadow-sm text-center`}>
+                            <p className="opacity-80 text-xs font-medium uppercase tracking-wider mb-1">Total Gastos {transactionCategory.toLowerCase()}</p>
                             <p className="text-2xl font-bold">
                                 {formatCurrency(expenses.reduce((sum, t) => sum + t.amount, 0), settings.currency, currencySymbol)}
                             </p>
                         </div>
                         <TransactionForm
                             type="EXPENSE"
+                            defaultCategory={transactionCategory}
                             onSuccess={handleSuccess}
                             initialData={editingTransaction}
                             onCancel={editingTransaction ? () => setEditingTransaction(null) : undefined}

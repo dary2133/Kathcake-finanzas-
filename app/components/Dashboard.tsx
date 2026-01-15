@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useTransactions, useSettings } from '@/app/lib/hooks';
 import { formatCurrency } from '@/app/lib/utils';
 
 export default function Dashboard() {
-    const { transactions, loading, refreshTransactions } = useTransactions();
+    const { transactions, loading } = useTransactions();
     const { settings } = useSettings();
+    const [view, setView] = useState<'ALL' | 'PERSONAL' | 'KATHCAKE'>('ALL');
 
     if (loading) {
         return <div className="p-8 text-center text-slate-500">Cargando datos...</div>;
@@ -14,47 +15,66 @@ export default function Dashboard() {
 
     const { currencySymbol } = settings;
 
-    // Calculate Totals
-    const totalIncome = transactions
+    // Filter transactions based on view
+    const filteredTransactions = transactions.filter(t => {
+        if (view === 'ALL') return true;
+        return t.transactionCategory === view;
+    });
+
+    // Calculate Totals using filtered transactions
+    const totalIncome = filteredTransactions
         .filter(t => t.type === 'INCOME' && t.status === 'PAID')
         .reduce((sum, t) => sum + t.amount, 0);
 
-    const totalExpense = transactions
+    const totalExpense = filteredTransactions
         .filter(t => t.type === 'EXPENSE' && t.status === 'PAID')
         .reduce((sum, t) => sum + t.amount, 0);
 
     const netBalance = totalIncome - totalExpense;
 
-    const pendingIncome = transactions
-        .filter(t => t.type === 'INCOME' && t.status === 'PENDING')
-        .reduce((sum, t) => sum + t.amount, 0);
-
-    const pendingExpense = transactions
-        .filter(t => t.type === 'EXPENSE' && t.status === 'PENDING')
-        .reduce((sum, t) => sum + t.amount, 0);
-
     return (
         <div className="space-y-8">
-            <div className="flex justify-between items-center bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white p-6 rounded-2xl border border-slate-100 shadow-sm gap-4">
                 <div>
-                    <h2 className="text-3xl font-bold text-slate-800 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">Resumen General</h2>
+                    <h2 className="text-3xl font-bold text-slate-800 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">Resumen Financiero</h2>
                     <p className="text-sm text-slate-400 mt-1 italic">
                         {new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                     </p>
+                </div>
+
+                <div className="flex bg-slate-100 p-1.5 rounded-2xl w-full md:w-auto">
+                    <button
+                        onClick={() => setView('ALL')}
+                        className={`flex-1 md:flex-none px-6 py-2 rounded-xl text-xs font-bold transition-all ${view === 'ALL' ? 'bg-white text-purple-600 shadow-sm scale-105' : 'text-slate-500 hover:text-slate-700'}`}
+                    >
+                        🌎 Global
+                    </button>
+                    <button
+                        onClick={() => setView('PERSONAL')}
+                        className={`flex-1 md:flex-none px-6 py-2 rounded-xl text-xs font-bold transition-all ${view === 'PERSONAL' ? 'bg-white text-blue-600 shadow-sm scale-105' : 'text-slate-500 hover:text-slate-700'}`}
+                    >
+                        🏠 Personal
+                    </button>
+                    <button
+                        onClick={() => setView('KATHCAKE')}
+                        className={`flex-1 md:flex-none px-6 py-2 rounded-xl text-xs font-bold transition-all ${view === 'KATHCAKE' ? 'bg-white text-emerald-600 shadow-sm scale-105' : 'text-slate-500 hover:text-slate-700'}`}
+                    >
+                        🎂 Kathcake
+                    </button>
                 </div>
             </div>
 
             {/* Summary Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <SummaryCard
-                    title="Ingresos Totales"
+                    title={`Ingresos ${view === 'ALL' ? 'Totales' : view}`}
                     amount={totalIncome}
                     type="income"
                     currency={settings.currency}
                     symbol={currencySymbol}
                 />
                 <SummaryCard
-                    title="Gastos Totales"
+                    title={`Gastos ${view === 'ALL' ? 'Totales' : view}`}
                     amount={totalExpense}
                     type="expense"
                     currency={settings.currency}
@@ -75,7 +95,9 @@ export default function Dashboard() {
                 {/* Ventas Summary */}
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
                     <div className="bg-emerald-600 p-4">
-                        <h3 className="text-white font-bold text-center uppercase tracking-widest text-sm">Ventas Kathcake 2025</h3>
+                        <h3 className="text-white font-bold text-center uppercase tracking-widest text-sm">
+                            Ventas {view === 'ALL' ? 'Globales' : view} 2025
+                        </h3>
                     </div>
                     <div className="bg-emerald-500/10 grid grid-cols-2 border-b border-emerald-100 italic">
                         <div className="p-2 text-emerald-800 font-bold text-xs text-center border-r border-emerald-100">PRODUCTO / SERVICIO</div>
@@ -83,7 +105,7 @@ export default function Dashboard() {
                     </div>
                     <div className="divide-y divide-slate-100 max-h-[500px] overflow-auto">
                         {(function () {
-                            const salesData = transactions
+                            const salesData = filteredTransactions
                                 .filter(t => t.type === 'INCOME')
                                 .reduce((acc, t) => {
                                     const key = t.description || 'Otros Ingresos';
@@ -112,7 +134,9 @@ export default function Dashboard() {
                 {/* Gastos Summary */}
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
                     <div className="bg-rose-600 p-4">
-                        <h3 className="text-white font-bold text-center uppercase tracking-widest text-sm">Gastos Kathcake 2025</h3>
+                        <h3 className="text-white font-bold text-center uppercase tracking-widest text-sm">
+                            Gastos {view === 'ALL' ? 'Globales' : view} 2025
+                        </h3>
                     </div>
                     <div className="bg-rose-500/10 grid grid-cols-2 border-b border-rose-100 italic">
                         <div className="p-2 text-rose-800 font-bold text-xs text-center border-r border-rose-100">DESCRIPCIÓN GASTO</div>
@@ -120,7 +144,7 @@ export default function Dashboard() {
                     </div>
                     <div className="divide-y divide-slate-100 max-h-[500px] overflow-auto">
                         {(function () {
-                            const expenseData = transactions
+                            const expenseData = filteredTransactions
                                 .filter(t => t.type === 'EXPENSE')
                                 .reduce((acc, t) => {
                                     const key = t.description || 'Otros Gastos';
@@ -172,4 +196,3 @@ function SummaryCard({ title, amount, type, symbol, currency, isNet = false }: {
         </div>
     );
 }
-

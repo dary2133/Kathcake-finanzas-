@@ -3,14 +3,15 @@ import { useState, useEffect } from 'react';
 import { Transaction, Account, FixedExpense, FixedIncome, TransactionType, AppSettings } from './types';
 import * as actions from './actions';
 
-export function useTransactions() {
+export function useTransactions(category?: 'PERSONAL' | 'KATHCAKE') {
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [loading, setLoading] = useState(true);
 
     const refreshTransactions = async () => {
         setLoading(true);
         const data = await actions.getTransactions();
-        setTransactions(data);
+        const filtered = category ? data.filter(t => t.transactionCategory === category) : data;
+        setTransactions(filtered);
         setLoading(false);
     };
 
@@ -20,9 +21,6 @@ export function useTransactions() {
     };
 
     const resetTransactions = async (type?: TransactionType) => {
-        // Since Postgres doesn't have a 'clear all' in actions yet, 
-        // we'd need to implement it. For now, let's just delete one by one or add a clear action.
-        // Actually, the user wanted start fresh.
         if (window.confirm('¿Confirmar borrado total de esta categoría?')) {
             const list = transactions.filter(t => !type || t.type === type);
             for (const t of list) {
@@ -34,19 +32,20 @@ export function useTransactions() {
 
     useEffect(() => {
         refreshTransactions();
-    }, []);
+    }, [category]);
 
     return { transactions, loading, refreshTransactions, removeTransaction, resetTransactions };
 }
 
-export function useAccounts() {
+export function useAccounts(category?: 'PERSONAL' | 'KATHCAKE') {
     const [accounts, setAccounts] = useState<Account[]>([]);
     const [loading, setLoading] = useState(true);
 
     const refreshAccounts = async () => {
         setLoading(true);
         const data = await actions.getAccounts();
-        setAccounts(data);
+        const filtered = category ? data.filter(a => a.category === category) : data;
+        setAccounts(filtered);
         setLoading(false);
     };
 
@@ -57,7 +56,7 @@ export function useAccounts() {
 
     useEffect(() => {
         refreshAccounts();
-    }, []);
+    }, [category]);
 
     return { accounts, loading, refreshAccounts, removeAccount };
 }
@@ -80,14 +79,15 @@ export function useSettings() {
     return { settings, loading, refreshSettings };
 }
 
-export function useFixedExpenses() {
+export function useFixedExpenses(category?: 'PERSONAL' | 'KATHCAKE') {
     const [fixedExpenses, setFixedExpenses] = useState<FixedExpense[]>([]);
     const [loading, setLoading] = useState(true);
 
     const refreshFixedExpenses = async () => {
         setLoading(true);
         const data = await actions.getFixedExpenses();
-        setFixedExpenses(data);
+        const filtered = category ? data.filter(e => e.category === category) : data;
+        setFixedExpenses(filtered);
         setLoading(false);
     };
 
@@ -98,19 +98,20 @@ export function useFixedExpenses() {
 
     useEffect(() => {
         refreshFixedExpenses();
-    }, []);
+    }, [category]);
 
     return { fixedExpenses, loading, refreshFixedExpenses, removeFixedExpense };
 }
 
-export function useFixedIncomes() {
+export function useFixedIncomes(category?: 'PERSONAL' | 'KATHCAKE') {
     const [fixedIncomes, setFixedIncomes] = useState<FixedIncome[]>([]);
     const [loading, setLoading] = useState(true);
 
     const refreshFixedIncomes = async () => {
         setLoading(true);
         const data = await actions.getFixedIncomes();
-        setFixedIncomes(data);
+        const filtered = category ? data.filter(i => i.category === category) : data;
+        setFixedIncomes(filtered);
         setLoading(false);
     };
 
@@ -121,7 +122,7 @@ export function useFixedIncomes() {
 
     useEffect(() => {
         refreshFixedIncomes();
-    }, []);
+    }, [category]);
 
     return { fixedIncomes, loading, refreshFixedIncomes, removeFixedIncome };
 }

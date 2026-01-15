@@ -11,9 +11,9 @@ import { formatCurrency } from '../lib/utils';
 import { Account, FixedExpense, FixedIncome } from '../lib/types';
 
 export default function CuentasPage() {
-    const { accounts, refreshAccounts, removeAccount } = useAccounts();
-    const { fixedExpenses, refreshFixedExpenses, removeFixedExpense } = useFixedExpenses();
-    const { fixedIncomes, refreshFixedIncomes, removeFixedIncome } = useFixedIncomes();
+    const { accounts, refreshAccounts, removeAccount } = useAccounts('PERSONAL');
+    const { fixedExpenses, refreshFixedExpenses, removeFixedExpense } = useFixedExpenses('PERSONAL');
+    const { fixedIncomes, refreshFixedIncomes, removeFixedIncome } = useFixedIncomes('PERSONAL');
     const { settings } = useSettings();
     const { currencySymbol, currency } = settings;
 
@@ -167,7 +167,7 @@ export default function CuentasPage() {
 
                             {showFixedIncomeForm && (
                                 <div className="p-4 bg-slate-50 border-b border-slate-100">
-                                    <FixedIncomeForm initialData={editingFixedIncome} onSuccess={handleFixedIncomeSuccess} onCancel={() => setShowFixedIncomeForm(false)} onDelete={removeFixedIncome} />
+                                    <FixedIncomeForm defaultCategory="PERSONAL" initialData={editingFixedIncome} onSuccess={handleFixedIncomeSuccess} onCancel={() => setShowFixedIncomeForm(false)} onDelete={removeFixedIncome} />
                                 </div>
                             )}
 
@@ -206,12 +206,12 @@ export default function CuentasPage() {
 
                             {showAccountForm && !editingAccount?.type?.includes('CREDIT') && (
                                 <div className="p-6 bg-slate-50 border-b border-slate-100">
-                                    <AccountForm initialData={editingAccount} onSuccess={handleAccountSuccess} onCancel={() => setShowAccountForm(false)} onDelete={removeAccount} />
+                                    <AccountForm defaultCategory="PERSONAL" initialData={editingAccount ? editingAccount : { id: '', name: '', type: 'CASH', balance: 0, category: 'PERSONAL' }} onSuccess={handleAccountSuccess} onCancel={() => setShowAccountForm(false)} onDelete={removeAccount} />
                                 </div>
                             )}
 
                             <div className="divide-y divide-slate-100">
-                                {liquidFunds.filter(acc => !acc.category || acc.category === 'PERSONAL').map(acc => (
+                                {liquidFunds.map(acc => (
                                     <div key={acc.id} className="p-4 flex justify-between items-center hover:bg-slate-50 group">
                                         <div className="flex items-center gap-3">
                                             <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm ${acc.type === 'CASH' ? 'bg-emerald-100 text-emerald-600' : 'bg-blue-100 text-blue-600'}`}>
@@ -230,42 +230,11 @@ export default function CuentasPage() {
                                         </div>
                                     </div>
                                 ))}
-                                {liquidFunds.filter(acc => !acc.category || acc.category === 'PERSONAL').length === 0 && <p className="p-6 text-center text-slate-400 text-sm">No hay cuentas personales.</p>}
+                                {liquidFunds.length === 0 && <p className="p-6 text-center text-slate-400 text-sm">No hay cuentas personales.</p>}
                             </div>
                         </section>
 
-                        {/* 2.5 DISPONIBILIDAD (CUENTAS KATHCAKE) */}
-                        <section id="kathcake" className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-                            <div className="p-5 border-b border-slate-100 bg-emerald-50 flex justify-between items-center">
-                                <div className="flex items-center gap-3">
-                                    <div className="h-6 w-1 bg-emerald-500 rounded-full"></div>
-                                    <h4 className="font-bold text-emerald-800">Cuentas Kathcake</h4>
-                                </div>
-                            </div>
-
-                            <div className="divide-y divide-slate-100">
-                                {liquidFunds.filter(acc => acc.category === 'KATHCAKE').map(acc => (
-                                    <div key={acc.id} className="p-4 flex justify-between items-center hover:bg-slate-50 group">
-                                        <div className="flex items-center gap-3">
-                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm bg-emerald-100 text-emerald-600`}>
-                                                {acc.type === 'CASH' ? '💵' : '🏦'}
-                                            </div>
-                                            <div>
-                                                <h4 className="font-bold text-slate-800 text-sm">{acc.name}</h4>
-                                                <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-600 font-medium lowercase">
-                                                    Empresa
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <div className="text-right">
-                                            <p className="text-sm font-bold text-slate-800">{formatCurrency(acc.balance, currency, currencySymbol)}</p>
-                                            <button onClick={() => { setEditingAccount(acc); setShowAccountForm(true); }} className="text-[10px] text-blue-500 hover:underline mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity">Editar</button>
-                                        </div>
-                                    </div>
-                                ))}
-                                {liquidFunds.filter(acc => acc.category === 'KATHCAKE').length === 0 && <p className="p-6 text-center text-slate-400 text-sm">No hay cuentas de Kathcake.</p>}
-                            </div>
-                        </section>
+                        {/* SECCIÓN KATHCAKE ELIMINADA DE ESTA VISTA PERSONAL */}
 
                         {/* 3. TARJETAS DE CRÉDITO */}
                         <section>
@@ -293,7 +262,7 @@ export default function CuentasPage() {
 
                                 {showAccountForm && (editingAccount?.type === 'CREDIT' || (!editingAccount && showAccountForm)) && (
                                     <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 mb-4 animate-fade-in-down">
-                                        <AccountForm initialData={editingAccount} onSuccess={handleAccountSuccess} onCancel={() => setShowAccountForm(false)} onDelete={removeAccount} />
+                                        <AccountForm defaultCategory="PERSONAL" initialData={editingAccount ? editingAccount : { id: '', name: '', type: 'CREDIT', balance: 0, category: 'PERSONAL' }} onSuccess={handleAccountSuccess} onCancel={() => setShowAccountForm(false)} onDelete={removeAccount} />
                                     </div>
                                 )}
 
@@ -369,7 +338,7 @@ export default function CuentasPage() {
 
                             {showFixedExpenseForm && (
                                 <div className="p-4 bg-slate-50 border-b border-slate-100">
-                                    <FixedExpenseForm initialData={editingFixedExpense} onSuccess={handleFixedExpenseSuccess} onCancel={() => setShowFixedExpenseForm(false)} onDelete={removeFixedExpense} />
+                                    <FixedExpenseForm defaultCategory="PERSONAL" initialData={editingFixedExpense} onSuccess={handleFixedExpenseSuccess} onCancel={() => setShowFixedExpenseForm(false)} onDelete={removeFixedExpense} />
                                 </div>
                             )}
 

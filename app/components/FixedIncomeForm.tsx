@@ -9,11 +9,13 @@ interface FixedIncomeFormProps {
     onSuccess: () => void;
     onCancel?: () => void;
     onDelete?: (id: string | number) => void;
+    defaultCategory?: 'PERSONAL' | 'KATHCAKE';
 }
 
-export default function FixedIncomeForm({ initialData, onSuccess, onCancel, onDelete }: FixedIncomeFormProps) {
+export default function FixedIncomeForm({ initialData, onSuccess, onCancel, onDelete, defaultCategory }: FixedIncomeFormProps) {
     const [name, setName] = useState(initialData?.name || '');
     const [amount, setAmount] = useState(initialData?.amount?.toString() || '');
+    const [category, setCategory] = useState<'PERSONAL' | 'KATHCAKE'>(initialData?.category || defaultCategory || 'PERSONAL');
 
     // Initialize with date picker logic matched to FixedExpenseForm
     const calculateInitialDate = () => {
@@ -52,6 +54,7 @@ export default function FixedIncomeForm({ initialData, onSuccess, onCancel, onDe
             name,
             amount: parseFloat(amount),
             paymentDay: dayPart,
+            category,
         };
 
         if (initialData) {
@@ -69,6 +72,20 @@ export default function FixedIncomeForm({ initialData, onSuccess, onCancel, onDe
     return (
         <form onSubmit={handleSubmit} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4 max-w-md mx-auto">
             <h3 className="text-lg font-semibold text-slate-800">{initialData ? 'Editar Ingreso Fijo' : 'Nuevo Ingreso Fijo'}</h3>
+
+            {!defaultCategory && (
+                <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">Categoría</label>
+                    <select
+                        value={category}
+                        onChange={(e) => setCategory(e.target.value as 'PERSONAL' | 'KATHCAKE')}
+                        className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-white"
+                    >
+                        <option value="PERSONAL">Personal</option>
+                        <option value="KATHCAKE">Kathcake</option>
+                    </select>
+                </div>
+            )}
 
             <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Concepto</label>

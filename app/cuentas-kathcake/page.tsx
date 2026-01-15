@@ -11,9 +11,9 @@ import { formatCurrency } from '../lib/utils';
 import { Account, FixedExpense, FixedIncome } from '../lib/types';
 
 export default function CuentasPage() {
-    const { accounts, refreshAccounts, removeAccount } = useAccounts();
-    const { fixedExpenses, refreshFixedExpenses, removeFixedExpense } = useFixedExpenses();
-    const { fixedIncomes, refreshFixedIncomes, removeFixedIncome } = useFixedIncomes();
+    const { accounts, refreshAccounts, removeAccount } = useAccounts('KATHCAKE');
+    const { fixedExpenses, refreshFixedExpenses, removeFixedExpense } = useFixedExpenses('KATHCAKE');
+    const { fixedIncomes, refreshFixedIncomes, removeFixedIncome } = useFixedIncomes('KATHCAKE');
     const { settings } = useSettings();
     const { currencySymbol, currency } = settings;
 
@@ -153,6 +153,44 @@ export default function CuentasPage() {
                     {/* LEFT COLUMN: INGRESOS, DISPONIBILIDAD, TARJETAS */}
                     <div className="space-y-8">
 
+                        {/* 1. INGRESOS FIJOS KATHCAKE */}
+                        <section className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col">
+                            <div className="p-5 border-b border-slate-100 bg-emerald-50 flex justify-between items-center">
+                                <div className="flex items-center gap-3">
+                                    <div className="h-6 w-1 bg-emerald-500 rounded-full"></div>
+                                    <h4 className="font-bold text-emerald-800">Ingresos Fijos Kathcake</h4>
+                                </div>
+                                <button onClick={() => { setEditingFixedIncome(null); setShowFixedIncomeForm(!showFixedIncomeForm); }} className="text-xs bg-white border border-slate-200 hover:bg-emerald-50 text-slate-600 px-3 py-1.5 rounded-lg transition-colors font-medium">
+                                    + Agregar
+                                </button>
+                            </div>
+
+                            {showFixedIncomeForm && (
+                                <div className="p-4 bg-slate-50 border-b border-slate-100">
+                                    <FixedIncomeForm defaultCategory="KATHCAKE" initialData={editingFixedIncome} onSuccess={handleFixedIncomeSuccess} onCancel={() => setShowFixedIncomeForm(false)} onDelete={removeFixedIncome} />
+                                </div>
+                            )}
+
+                            <div className="divide-y divide-slate-100">
+                                {fixedIncomes.map(inc => (
+                                    <div key={inc.id} className="p-4 flex justify-between items-center group hover:bg-slate-50">
+                                        <div>
+                                            <p className="font-medium text-slate-800">{inc.name}</p>
+                                            <p className="text-xs text-slate-400">Día de cobro: {inc.paymentDay || 'N/A'}</p>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            <span className="font-bold text-emerald-600">{formatCurrency(inc.amount, currency, currencySymbol)}</span>
+                                            <button onClick={() => { setEditingFixedIncome(inc); setShowFixedIncomeForm(true); }} className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-blue-500 transition-all">✏️</button>
+                                        </div>
+                                    </div>
+                                ))}
+                                {fixedIncomes.length === 0 && <p className="p-6 text-center text-slate-400 text-sm">No hay ingresos de negocio registrados.</p>}
+                            </div>
+                            <div className="p-4 bg-slate-50 border-t border-slate-100 flex justify-between items-center">
+                                <span className="text-xs font-bold text-slate-500 uppercase">Total Ingresos Negocio</span>
+                                <span className="font-bold text-emerald-700">{formatCurrency(totalFixedIncome, currency, currencySymbol)}</span>
+                            </div>
+                        </section>
 
                         {/* 2.5 DISPONIBILIDAD (CUENTAS KATHCAKE) */}
                         <section id="kathcake" className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
@@ -168,13 +206,12 @@ export default function CuentasPage() {
 
                             {showAccountForm && !editingAccount?.type?.includes('CREDIT') && (
                                 <div className="p-6 bg-slate-50 border-b border-slate-100">
-                                    {/* Pasamos 'KATHCAKE' como sugerencia inicial si se crea una nueva */}
                                     <AccountForm initialData={editingAccount ? editingAccount : { id: '', name: '', type: 'CASH', balance: 0, category: 'KATHCAKE' }} onSuccess={handleAccountSuccess} onCancel={() => setShowAccountForm(false)} onDelete={removeAccount} />
                                 </div>
                             )}
 
                             <div className="divide-y divide-slate-100">
-                                {liquidFunds.filter(acc => acc.category === 'KATHCAKE').map(acc => (
+                                {liquidFunds.map(acc => (
                                     <div key={acc.id} className="p-4 flex justify-between items-center hover:bg-slate-50 group">
                                         <div className="flex items-center gap-3">
                                             <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm bg-emerald-100 text-emerald-600`}>
@@ -193,16 +230,16 @@ export default function CuentasPage() {
                                         </div>
                                     </div>
                                 ))}
-                                {liquidFunds.filter(acc => acc.category === 'KATHCAKE').length === 0 && <p className="p-6 text-center text-slate-400 text-sm">No hay cuentas de Kathcake.</p>}
+                                {liquidFunds.length === 0 && <p className="p-6 text-center text-slate-400 text-sm">No hay cuentas de Kathcake.</p>}
                             </div>
                         </section>
 
-                        {/* 3. TARJETAS DE CRÉDITO */}
+                        {/* 3. TARJETAS DE CRÉDITO KATHCAKE */}
                         <section>
                             <div className="flex items-center justify-between mb-4">
                                 <div className="flex items-center gap-3">
                                     <div className="h-6 w-1 bg-rose-500 rounded-full"></div>
-                                    <h4 className="font-bold text-slate-700">Tarjetas de Crédito</h4>
+                                    <h4 className="font-bold text-slate-700">Tarjetas de Crédito Negocio</h4>
                                 </div>
                                 <div className="flex gap-2">
                                     <button onClick={() => { setShowCardExpenseForm(!showCardExpenseForm); setShowAccountForm(false); }} className="text-xs px-3 py-1.5 bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold rounded-lg transition-colors shadow-sm">
@@ -223,7 +260,7 @@ export default function CuentasPage() {
 
                                 {showAccountForm && (editingAccount?.type === 'CREDIT' || (!editingAccount && showAccountForm)) && (
                                     <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 mb-4 animate-fade-in-down">
-                                        <AccountForm initialData={editingAccount} onSuccess={handleAccountSuccess} onCancel={() => setShowAccountForm(false)} onDelete={removeAccount} />
+                                        <AccountForm initialData={editingAccount ? editingAccount : { id: '', name: '', type: 'CREDIT', balance: 0, category: 'KATHCAKE' }} onSuccess={handleAccountSuccess} onCancel={() => setShowAccountForm(false)} onDelete={removeAccount} />
                                     </div>
                                 )}
 
@@ -299,7 +336,7 @@ export default function CuentasPage() {
 
                             {showFixedExpenseForm && (
                                 <div className="p-4 bg-slate-50 border-b border-slate-100">
-                                    <FixedExpenseForm initialData={editingFixedExpense} onSuccess={handleFixedExpenseSuccess} onCancel={() => setShowFixedExpenseForm(false)} onDelete={removeFixedExpense} />
+                                    <FixedExpenseForm defaultCategory="KATHCAKE" initialData={editingFixedExpense} onSuccess={handleFixedExpenseSuccess} onCancel={() => setShowFixedExpenseForm(false)} onDelete={removeFixedExpense} />
                                 </div>
                             )}
 
