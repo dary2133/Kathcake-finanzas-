@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Transaction, Account, FixedExpense, TransactionType, AppSettings } from './types';
+import { Transaction, Account, FixedExpense, FixedIncome, TransactionType, AppSettings } from './types';
 import * as actions from './actions';
 
 export function useTransactions() {
@@ -101,4 +101,27 @@ export function useFixedExpenses() {
     }, []);
 
     return { fixedExpenses, loading, refreshFixedExpenses, removeFixedExpense };
+}
+
+export function useFixedIncomes() {
+    const [fixedIncomes, setFixedIncomes] = useState<FixedIncome[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    const refreshFixedIncomes = async () => {
+        setLoading(true);
+        const data = await actions.getFixedIncomes();
+        setFixedIncomes(data);
+        setLoading(false);
+    };
+
+    const removeFixedIncome = async (id: string | number) => {
+        await actions.deleteFixedIncome(String(id));
+        await refreshFixedIncomes();
+    };
+
+    useEffect(() => {
+        refreshFixedIncomes();
+    }, []);
+
+    return { fixedIncomes, loading, refreshFixedIncomes, removeFixedIncome };
 }

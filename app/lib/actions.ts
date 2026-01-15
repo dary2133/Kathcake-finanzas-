@@ -3,7 +3,7 @@
 
 import { sql } from '@vercel/postgres';
 import { revalidatePath } from 'next/cache';
-import { Transaction, Account, FixedExpense, AppSettings, TransactionType } from './types';
+import { Transaction, Account, FixedExpense, FixedIncome, AppSettings, TransactionType } from './types';
 
 // ACCOUNTS
 export async function getAccounts(): Promise<Account[]> {
@@ -199,6 +199,65 @@ export async function deleteFixedExpense(id: string) {
         revalidatePath('/cuentas');
     } catch (error) {
         console.error('Failed to delete fixed expense:', error);
+    }
+}
+
+// FIXED INCOMES
+export async function getFixedIncomes(): Promise<FixedIncome[]> {
+    try {
+        await sql`CREATE TABLE IF NOT EXISTS fixed_incomes (
+            id TEXT PRIMARY KEY, 
+            name TEXT NOT NULL, 
+            amount DECIMAL(10,2) NOT NULL, 
+            payment_day INTEGER
+        )`;
+
+        const { rows } = await sql<any>`SELECT * FROM fixed_incomes ORDER BY name ASC`;
+        return rows.map(row => ({
+            id: row.id,
+            name: row.name,
+            amount: parseFloat(row.amount),
+            paymentDay: row.payment_day
+        }));
+    } catch (error) {
+        console.error('Failed to fetch fixed incomes:', error);
+        return [];
+    }
+}
+
+export async function addFixedIncome(i: FixedIncome) {
+    try {
+        await sql`
+            INSERT INTO fixed_incomes (id, name, amount, payment_day)
+            VALUES (${i.id}, ${i.name}, ${i.amount}, ${i.paymentDay || null})
+        `;
+        revalidatePath('/cuentas');
+    } catch (error) {
+        console.error('Failed to add fixed income:', error);
+    }
+}
+
+export async function updateFixedIncome(i: FixedIncome) {
+    try {
+        await sql`
+            UPDATE fixed_incomes 
+            SET name = ${i.name}, 
+                amount = ${i.amount}, 
+                payment_day = ${i.paymentDay || null}
+            WHERE id = ${i.id}
+        `;
+        revalidatePath('/cuentas');
+    } catch (error) {
+        console.error('Failed to update fixed income:', error);
+    }
+}
+
+export async function deleteFixedIncome(id: string) {
+    try {
+        await sql`DELETE FROM fixed_incomes WHERE id = ${id}`;
+        revalidatePath('/cuentas');
+    } catch (error) {
+        console.error('Failed to delete fixed income:', error);
     }
 }
 

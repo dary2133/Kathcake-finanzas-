@@ -45,6 +45,13 @@ export interface FixedExpense {
     paymentLimitDay?: number; // e.g. 5 (means 5th of each month)
 }
 
+export interface FixedIncome {
+    id: string;
+    name: string;      // e.g. "Salario", "Alquiler Local"
+    amount: number;
+    paymentDay?: number; // e.g. 15 or 30
+}
+
 export interface ParsedRecord {
     date: string;
     description: string;
