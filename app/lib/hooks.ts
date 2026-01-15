@@ -43,9 +43,17 @@ export function useAccounts(category?: 'PERSONAL' | 'KATHCAKE') {
 
     const refreshAccounts = async () => {
         setLoading(true);
-        const data = await actions.getAccounts();
-        const filtered = category ? data.filter(a => a.category === category) : data;
-        setAccounts(filtered);
+        try {
+            const data = await actions.getAccounts();
+            // Filter by category if provided, otherwise return all
+            const filtered = category && Array.isArray(data)
+                ? data.filter(a => a && a.category === category)
+                : (Array.isArray(data) ? data : []);
+            setAccounts(filtered);
+        } catch (error) {
+            console.error('Error fetching accounts:', error);
+            setAccounts([]);
+        }
         setLoading(false);
     };
 
@@ -85,9 +93,16 @@ export function useFixedExpenses(category?: 'PERSONAL' | 'KATHCAKE') {
 
     const refreshFixedExpenses = async () => {
         setLoading(true);
-        const data = await actions.getFixedExpenses();
-        const filtered = category ? data.filter(e => e.category === category) : data;
-        setFixedExpenses(filtered);
+        try {
+            const data = await actions.getFixedExpenses();
+            const filtered = category && Array.isArray(data)
+                ? data.filter(e => e && e.category === category)
+                : (Array.isArray(data) ? data : []);
+            setFixedExpenses(filtered);
+        } catch (error) {
+            console.error('Error fetching fixed expenses:', error);
+            setFixedExpenses([]);
+        }
         setLoading(false);
     };
 
@@ -109,9 +124,16 @@ export function useFixedIncomes(category?: 'PERSONAL' | 'KATHCAKE') {
 
     const refreshFixedIncomes = async () => {
         setLoading(true);
-        const data = await actions.getFixedIncomes();
-        const filtered = category ? data.filter(i => i.category === category) : data;
-        setFixedIncomes(filtered);
+        try {
+            const data = await actions.getFixedIncomes();
+            const filtered = category && Array.isArray(data)
+                ? data.filter(i => i && i.category === category)
+                : (Array.isArray(data) ? data : []);
+            setFixedIncomes(filtered);
+        } catch (error) {
+            console.error('Error fetching fixed incomes:', error);
+            setFixedIncomes([]);
+        }
         setLoading(false);
     };
 
