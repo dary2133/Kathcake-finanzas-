@@ -7,7 +7,8 @@ import { formatCurrency } from '@/app/lib/utils';
 export default function Dashboard() {
     const { transactions, loading } = useTransactions();
     const { settings } = useSettings();
-    const [view, setView] = useState<'ALL' | 'PERSONAL' | 'KATHCAKE'>('ALL');
+    // Default to KATHCAKE as requested
+    const [view, setView] = useState<'ALL' | 'PERSONAL' | 'KATHCAKE'>('KATHCAKE');
 
     if (loading) {
         return <div className="p-8 text-center text-slate-500">Cargando datos...</div>;
@@ -38,10 +39,12 @@ export default function Dashboard() {
                 <div>
                     <h2 className="text-3xl font-bold text-slate-800 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">Resumen Financiero</h2>
                     <p className="text-sm text-slate-400 mt-1 italic">
-                        {new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                        Kathcake Business • {new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                     </p>
                 </div>
 
+                {/* Categories selector removed by request - Focus on Kathcake */}
+                {/* 
                 <div className="flex bg-slate-100 p-1.5 rounded-2xl w-full md:w-auto">
                     <button
                         onClick={() => setView('ALL')}
@@ -62,26 +65,27 @@ export default function Dashboard() {
                         🎂 Kathcake
                     </button>
                 </div>
+                */}
             </div>
 
             {/* Summary Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <SummaryCard
-                    title={`Ingresos ${view === 'ALL' ? 'Totales' : view}`}
+                    title="Ventas Kathcake"
                     amount={totalIncome}
                     type="income"
                     currency={settings.currency}
                     symbol={currencySymbol}
                 />
                 <SummaryCard
-                    title={`Gastos ${view === 'ALL' ? 'Totales' : view}`}
+                    title="Gastos Kathcake"
                     amount={totalExpense}
                     type="expense"
                     currency={settings.currency}
                     symbol={currencySymbol}
                 />
                 <SummaryCard
-                    title="Balance Neto"
+                    title="Utilidad Neta"
                     amount={netBalance}
                     type="neutral"
                     isNet={true}
@@ -96,7 +100,7 @@ export default function Dashboard() {
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
                     <div className="bg-emerald-600 p-4">
                         <h3 className="text-white font-bold text-center uppercase tracking-widest text-sm">
-                            Ventas {view === 'ALL' ? 'Globales' : view} 2025
+                            Detalle de Ventas 2025
                         </h3>
                     </div>
                     <div className="bg-emerald-500/10 grid grid-cols-2 border-b border-emerald-100 italic">
@@ -135,7 +139,7 @@ export default function Dashboard() {
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
                     <div className="bg-rose-600 p-4">
                         <h3 className="text-white font-bold text-center uppercase tracking-widest text-sm">
-                            Gastos {view === 'ALL' ? 'Globales' : view} 2025
+                            Detalle de Gastos 2025
                         </h3>
                     </div>
                     <div className="bg-rose-500/10 grid grid-cols-2 border-b border-rose-100 italic">
