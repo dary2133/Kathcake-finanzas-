@@ -11,7 +11,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         { name: 'Dashboard', href: '/' },
         { name: 'Ingresos', href: '/ingresos' },
         { name: 'Gastos', href: '/gastos' },
-        { name: 'Cuentas Kathcake', href: '/cuentas#kathcake' },
+        { name: 'Cuentas Kathcake', href: '/cuentas-kathcake' },
         { name: 'Cuentas Personales', href: '/cuentas' },
         { name: 'Reportes', href: '/reportes' },
         { name: 'Configuración', href: '/configuracion' },
