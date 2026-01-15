@@ -14,18 +14,44 @@ interface FixedIncomeFormProps {
 export default function FixedIncomeForm({ initialData, onSuccess, onCancel, onDelete }: FixedIncomeFormProps) {
     const [name, setName] = useState(initialData?.name || '');
     const [amount, setAmount] = useState(initialData?.amount?.toString() || '');
-    const [paymentDay, setPaymentDay] = useState(initialData?.paymentDay?.toString() || '');
+
+    // Initialize with date picker logic matched to FixedExpenseForm
+    const calculateInitialDate = () => {
+        if (!initialData?.paymentDay) return new Date().toISOString().split('T')[0];
+
+        const today = new Date();
+        const day = initialData.paymentDay;
+
+        // Create candidate date for this month
+        let targetDate = new Date(today.getFullYear(), today.getMonth(), day);
+
+        // If day already passed, show next month
+        if (targetDate < today) {
+            targetDate.setMonth(targetDate.getMonth() + 1);
+        }
+
+        const yyp = targetDate.getFullYear();
+        const mmp = String(targetDate.getMonth() + 1).padStart(2, '0');
+        const ddp = String(day).padStart(2, '0');
+
+        return `${yyp}-${mmp}-${ddp}`;
+    };
+
+    const [paymentDate, setPaymentDate] = useState(calculateInitialDate());
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         if (!name || !amount) return;
 
+        // Extract Day from picked date
+        const dayPart = parseInt(paymentDate.split('-')[2]);
+
         const newIncome: FixedIncome = {
             id: initialData?.id || crypto.randomUUID(),
             name,
             amount: parseFloat(amount),
-            paymentDay: paymentDay ? parseInt(paymentDay) : undefined,
+            paymentDay: dayPart,
         };
 
         if (initialData) {
@@ -37,7 +63,6 @@ export default function FixedIncomeForm({ initialData, onSuccess, onCancel, onDe
         // Reset form
         setName('');
         setAmount('');
-        setPaymentDay('');
         onSuccess();
     };
 
@@ -53,7 +78,7 @@ export default function FixedIncomeForm({ initialData, onSuccess, onCancel, onDe
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                    placeholder="Ej: Salario, Alquiler"
+                    placeholder="Ej: Salario Quincena 1"
                 />
             </div>
 
@@ -73,12 +98,11 @@ export default function FixedIncomeForm({ initialData, onSuccess, onCancel, onDe
                 <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">Día de Cobro</label>
                     <input
-                        type="number"
-                        min="1" max="31"
-                        value={paymentDay}
-                        onChange={(e) => setPaymentDay(e.target.value)}
+                        type="date"
+                        required
+                        value={paymentDate}
+                        onChange={(e) => setPaymentDate(e.target.value)}
                         className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                        placeholder="Ej: 15"
                     />
                 </div>
             </div>
