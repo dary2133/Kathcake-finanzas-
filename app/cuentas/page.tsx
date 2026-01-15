@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import AccountForm from '../components/AccountForm';
 import FixedExpenseForm from '../components/FixedExpenseForm';
@@ -11,11 +11,14 @@ import { formatCurrency } from '../lib/utils';
 import { Account, FixedExpense, FixedIncome } from '../lib/types';
 
 export default function CuentasPage() {
-    const { accounts, refreshAccounts, removeAccount } = useAccounts('PERSONAL');
-    const { fixedExpenses, refreshFixedExpenses, removeFixedExpense } = useFixedExpenses('PERSONAL');
-    const { fixedIncomes, refreshFixedIncomes, removeFixedIncome } = useFixedIncomes('PERSONAL');
+    const [isMounted, setIsMounted] = useState(false);
+    useEffect(() => { setIsMounted(true); }, []);
+
+    const { accounts = [], refreshAccounts, removeAccount } = useAccounts('PERSONAL');
+    const { fixedExpenses = [], refreshFixedExpenses, removeFixedExpense } = useFixedExpenses('PERSONAL');
+    const { fixedIncomes = [], refreshFixedIncomes, removeFixedIncome } = useFixedIncomes('PERSONAL');
     const { settings } = useSettings();
-    const { currencySymbol, currency } = settings;
+    const { currencySymbol = 'RD$', currency = 'DOP' } = settings || {};
 
     // State for Forms
     const [editingAccount, setEditingAccount] = useState<Account | null>(null);
@@ -39,14 +42,20 @@ export default function CuentasPage() {
     const handleFixedExpenseSuccess = () => { setShowFixedExpenseForm(false); setEditingFixedExpense(null); refreshFixedExpenses(); };
     const handleFixedIncomeSuccess = () => { setShowFixedIncomeForm(false); setEditingFixedIncome(null); refreshFixedIncomes(); };
 
-    // Group Accounts & Totals
-    const liquidFunds = accounts.filter(a => a.type === 'CASH' || a.type === 'BANK' || a.type === 'INVESTMENT');
-    const creditCards = accounts.filter(a => a.type === 'CREDIT');
-    const totalFunds = liquidFunds.reduce((sum, a) => sum + a.balance, 0);
-    const totalDebt = creditCards.reduce((sum, a) => sum + a.balance, 0);
-    const totalFixedIncome = fixedIncomes.reduce((sum, i) => sum + i.amount, 0);
-    const totalFixedExpense = fixedExpenses.reduce((sum, e) => sum + e.amount, 0);
+    // Group Accounts & Totals (with safety)
+    const safeAccounts = Array.isArray(accounts) ? accounts : [];
+    const safeExpenses = Array.isArray(fixedExpenses) ? fixedExpenses : [];
+    const safeIncomes = Array.isArray(fixedIncomes) ? fixedIncomes : [];
+
+    const liquidFunds = safeAccounts.filter(a => a && (a.type === 'CASH' || a.type === 'BANK' || a.type === 'INVESTMENT'));
+    const creditCards = safeAccounts.filter(a => a && a.type === 'CREDIT');
+    const totalFunds = liquidFunds.reduce((sum, a) => sum + (a.balance || 0), 0);
+    const totalDebt = creditCards.reduce((sum, a) => sum + (a.balance || 0), 0);
+    const totalFixedIncome = safeIncomes.reduce((sum, i) => sum + (i.amount || 0), 0);
+    const totalFixedExpense = safeExpenses.reduce((sum, e) => sum + (e.amount || 0), 0);
     const netMonthlyFlow = totalFixedIncome - totalFixedExpense;
+
+    if (!isMounted) return <Layout><div className="p-20 text-center text-slate-400">Cargando...</div></Layout>;
 
     return (
         <Layout>
