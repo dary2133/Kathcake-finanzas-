@@ -19,6 +19,9 @@ export default function Dashboard() {
     // Filter transactions based on view
     const filteredTransactions = transactions.filter(t => {
         if (view === 'ALL') return true;
+        // If it's Kathcake view, include those explicitly marked as KATHCAKE 
+        // OR those that have NO category (to fix the user's issue with old or uncategorized data)
+        if (view === 'KATHCAKE') return t.transactionCategory === 'KATHCAKE' || !t.transactionCategory;
         return t.transactionCategory === view;
     });
 
@@ -42,30 +45,6 @@ export default function Dashboard() {
                         Kathcake Business • {new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                     </p>
                 </div>
-
-                {/* Categories selector removed by request - Focus on Kathcake */}
-                {/* 
-                <div className="flex bg-slate-100 p-1.5 rounded-2xl w-full md:w-auto">
-                    <button
-                        onClick={() => setView('ALL')}
-                        className={`flex-1 md:flex-none px-6 py-2 rounded-xl text-xs font-bold transition-all ${view === 'ALL' ? 'bg-white text-purple-600 shadow-sm scale-105' : 'text-slate-500 hover:text-slate-700'}`}
-                    >
-                        🌎 Global
-                    </button>
-                    <button
-                        onClick={() => setView('PERSONAL')}
-                        className={`flex-1 md:flex-none px-6 py-2 rounded-xl text-xs font-bold transition-all ${view === 'PERSONAL' ? 'bg-white text-blue-600 shadow-sm scale-105' : 'text-slate-500 hover:text-slate-700'}`}
-                    >
-                        🏠 Personal
-                    </button>
-                    <button
-                        onClick={() => setView('KATHCAKE')}
-                        className={`flex-1 md:flex-none px-6 py-2 rounded-xl text-xs font-bold transition-all ${view === 'KATHCAKE' ? 'bg-white text-emerald-600 shadow-sm scale-105' : 'text-slate-500 hover:text-slate-700'}`}
-                    >
-                        🎂 Kathcake
-                    </button>
-                </div>
-                */}
             </div>
 
             {/* Summary Cards */}

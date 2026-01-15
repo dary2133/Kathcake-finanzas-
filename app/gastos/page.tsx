@@ -14,9 +14,10 @@ export default function GastosPage() {
     const { currencySymbol } = settings;
     const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
     const [isManageMode, setIsManageMode] = useState(false);
-    const [transactionCategory, setTransactionCategory] = useState<'PERSONAL' | 'KATHCAKE'>('PERSONAL');
+    // Updated default to KATHCAKE as per USER request
+    const [transactionCategory, setTransactionCategory] = useState<'PERSONAL' | 'KATHCAKE'>('KATHCAKE');
 
-    const expenses = transactions.filter(t => t.type === 'EXPENSE' && t.transactionCategory === transactionCategory);
+    const expenses = transactions.filter(t => t.type === 'EXPENSE' && (t.transactionCategory === transactionCategory || (!t.transactionCategory && transactionCategory === 'KATHCAKE')));
 
     const handleSuccess = () => {
         refreshTransactions();
