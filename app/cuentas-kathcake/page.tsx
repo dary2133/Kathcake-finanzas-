@@ -74,57 +74,30 @@ export default function CuentasPage() {
                             {netMonthlyFlow > 0 ? '+' : ''}{formatCurrency(netMonthlyFlow, currency, currencySymbol)}
                         </p>
 
-                        {/* Dynamic Period Analysis */}
-                        <div className="mt-4 pt-4 border-t border-dashed border-slate-200 text-xs space-y-4">
-                            {(function () {
-                                const incomeDays = Array.from(new Set(fixedIncomes.map(i => i.paymentDay || 1))).sort((a, b) => a - b);
-                                if (incomeDays.length === 0) return <p className="text-slate-400 italic">Agrega ingresos para ver el desglose por periodo.</p>;
-                                return incomeDays.map((startDay, index) => {
-                                    const nextStartDay = incomeDays[(index + 1) % incomeDays.length];
-                                    const isLast = index === incomeDays.length - 1;
-                                    const rangeLabel = isLast ? `Periodo: Día ${startDay} al ${nextStartDay > 1 ? nextStartDay - 1 : 30} (prox. mes)` : `Periodo: Día ${startDay} al ${nextStartDay - 1}`;
-                                    const periodIncome = fixedIncomes.filter(i => (i.paymentDay || 1) === startDay).reduce((sum, i) => sum + i.amount, 0);
-                                    const expensesInPeriod = fixedExpenses.filter(exp => {
-                                        const day = exp.paymentLimitDay || 1;
-                                        if (startDay < nextStartDay) return day >= startDay && day < nextStartDay;
-                                        else return day >= startDay || day < nextStartDay;
-                                    });
-                                    const periodExpenseTotal = expensesInPeriod.reduce((sum, e) => sum + e.amount, 0);
-                                    const balance = periodIncome - periodExpenseTotal;
-                                    const expenseNames = expensesInPeriod.map(e => e.name).join(', ');
-                                    return (
-                                        <div key={startDay} className="bg-white/50 rounded-lg p-2 border border-slate-100">
-                                            <div className="flex justify-between items-center mb-1">
-                                                <span className="font-bold text-slate-700">{rangeLabel}</span>
-                                                <span className={`font-bold ${balance >= 0 ? 'text-blue-600' : 'text-orange-500'}`}>
-                                                    Dispo: {formatCurrency(balance, currency, currencySymbol)}
-                                                </span>
-                                            </div>
-                                            <div className="grid grid-cols-2 gap-2 text-[10px] text-slate-500">
-                                                <div><span className="block text-emerald-600 font-medium">Ingresos (+{formatCurrency(periodIncome, currency, currencySymbol)})</span></div>
-                                                <div className="relative group/tooltip">
-                                                    <span className="block text-rose-500 font-medium cursor-help">Gastos (-{formatCurrency(periodExpenseTotal, currency, currencySymbol)})</span>
-                                                    {expensesInPeriod.length > 0 && (
-                                                        <>
-                                                            <span className="block truncate opacity-75">{expenseNames}</span>
-                                                            <div className="absolute left-0 bottom-full mb-2 hidden group-hover/tooltip:block bg-slate-800 text-white text-[10px] p-2 rounded-lg shadow-xl z-50 min-w-[200px] border border-slate-700">
-                                                                <p className="font-bold border-b border-slate-600 mb-1 pb-1">Desglose del periodo:</p>
-                                                                {expensesInPeriod.map(e => (
-                                                                    <div key={e.id} className="flex justify-between gap-4 py-0.5">
-                                                                        <span>{e.name}</span>
-                                                                        <span className="font-mono text-rose-300">{formatCurrency(e.amount, currency, currencySymbol)}</span>
-                                                                    </div>
-                                                                ))}
-                                                                <div className="absolute top-full left-4 w-2 h-2 bg-slate-800 rotate-45 -translate-y-1"></div>
-                                                            </div>
-                                                        </>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    );
-                                });
-                            })()}
+                        {/* Simplified Monthly Analysis for Business */}
+                        <div className="mt-4 pt-4 border-t border-dashed border-slate-200 text-xs space-y-3">
+                            <div className="bg-white/50 rounded-lg p-3 border border-slate-100">
+                                <div className="flex justify-between items-center mb-2">
+                                    <span className="font-bold text-slate-700 tracking-tight">Cierre Mensual Estimado</span>
+                                    <span className={`font-bold ${netMonthlyFlow >= 0 ? 'text-blue-600' : 'text-orange-500'}`}>
+                                        Balance: {formatCurrency(netMonthlyFlow, currency, currencySymbol)}
+                                    </span>
+                                </div>
+                                <div className="space-y-2">
+                                    <div className="flex justify-between text-[10px]">
+                                        <span className="text-slate-500 font-medium">Ventas Proyectadas (Ingresos)</span>
+                                        <span className="text-emerald-600 font-bold">+{formatCurrency(totalFixedIncome, currency, currencySymbol)}</span>
+                                    </div>
+                                    <div className="flex justify-between text-[10px]">
+                                        <span className="text-slate-500 font-medium">Gastos Operativos Fijos</span>
+                                        <span className="text-rose-500 font-bold">-{formatCurrency(totalFixedExpense, currency, currencySymbol)}</span>
+                                    </div>
+                                    <div className="pt-2 border-t border-slate-100 flex justify-between items-center">
+                                        <p className="text-[9px] text-slate-400 italic font-medium uppercase tracking-wider">Ciclo mensual único</p>
+                                        <span className="text-[9px] font-extrabold text-blue-500 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">NEGOCIO</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
