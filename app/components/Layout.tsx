@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -19,7 +20,16 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <div className='min-h-screen bg-slate-50 flex font-sans text-slate-900'>
             {/* Sidebar */}
             <aside className='w-64 bg-slate-900 text-white flex flex-col fixed h-full'>
-                <div className='p-6 border-b border-slate-700'>
+                <div className='p-6 border-b border-slate-700 flex flex-col items-center text-center'>
+                    <div className="mb-4 relative w-32 h-32">
+                        <Image
+                            src="/Kath Cake logo Vector33.png"
+                            alt="Kathcake Logo"
+                            fill
+                            className="object-contain"
+                            priority
+                        />
+                    </div>
                     <h1 className='text-2xl font-bold bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent'>
                         Kathcake
                     </h1>
