@@ -70,18 +70,19 @@ export default function CuentasPage() {
                     </div>
                 </div>
 
-                {/* SECTION 1: FLUJO FIJO MENSUAL */}
-                <section>
-                    <div className="flex items-center gap-3 mb-6">
-                        <div className="h-8 w-1 bg-purple-600 rounded-full"></div>
-                        <h3 className="text-xl font-bold text-slate-800">Flujo Fijo Mensual</h3>
-                    </div>
+                {/* MAIN GRID LAYOUT */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
 
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-                        {/* INGRESOS FIJOS */}
-                        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col">
+                    {/* LEFT COLUMN: INGRESOS, DISPONIBILIDAD, TARJETAS */}
+                    <div className="space-y-8">
+
+                        {/* 1. INGRESOS FIJOS */}
+                        <section className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col">
                             <div className="p-5 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
-                                <h4 className="font-semibold text-slate-700">Ingresos Fijos Estipulados</h4>
+                                <div className="flex items-center gap-3">
+                                    <div className="h-6 w-1 bg-emerald-500 rounded-full"></div>
+                                    <h4 className="font-bold text-slate-700">Ingresos Fijos</h4>
+                                </div>
                                 <button onClick={() => { setEditingFixedIncome(null); setShowFixedIncomeForm(!showFixedIncomeForm); }} className="text-xs bg-white border border-slate-200 hover:bg-emerald-50 text-slate-600 px-3 py-1.5 rounded-lg transition-colors font-medium">
                                     + Agregar
                                 </button>
@@ -106,18 +107,152 @@ export default function CuentasPage() {
                                         </div>
                                     </div>
                                 ))}
-                                {fixedIncomes.length === 0 && <p className="p-8 text-center text-slate-400 text-sm">No hay ingresos fijos registrados.</p>}
+                                {fixedIncomes.length === 0 && <p className="p-6 text-center text-slate-400 text-sm">No hay ingresos registrados.</p>}
                             </div>
                             <div className="p-4 bg-slate-50 border-t border-slate-100 flex justify-between items-center">
-                                <span className="text-xs font-bold text-slate-500 uppercase">Total Ingresos Fijos</span>
+                                <span className="text-xs font-bold text-slate-500 uppercase">Total Ingresos</span>
                                 <span className="font-bold text-emerald-700">{formatCurrency(totalFixedIncome, currency, currencySymbol)}</span>
                             </div>
-                        </div>
+                        </section>
 
-                        {/* GASTOS FIJOS */}
-                        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col">
+                        {/* 2. DISPONIBILIDAD (CUENTAS) */}
+                        <section className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
                             <div className="p-5 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
-                                <h4 className="font-semibold text-slate-700">Gastos Fijos Mensuales</h4>
+                                <div className="flex items-center gap-3">
+                                    <div className="h-6 w-1 bg-blue-500 rounded-full"></div>
+                                    <h4 className="font-bold text-slate-700">Disponibilidad</h4>
+                                </div>
+                                <button onClick={() => { setEditingAccount(null); setShowAccountForm(!showAccountForm); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="text-xs bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 px-3 py-1.5 rounded-lg transition-colors font-medium">
+                                    + Nueva
+                                </button>
+                            </div>
+
+                            {/* Reuse Account Form just for generic accounts if needed here */}
+                            {showAccountForm && !editingAccount?.type?.includes('CREDIT') && (
+                                <div className="p-6 bg-slate-50 border-b border-slate-100">
+                                    <AccountForm initialData={editingAccount} onSuccess={handleAccountSuccess} onCancel={() => setShowAccountForm(false)} onDelete={removeAccount} />
+                                </div>
+                            )}
+
+                            <div className="divide-y divide-slate-100">
+                                {liquidFunds.map(acc => (
+                                    <div key={acc.id} className="p-4 flex justify-between items-center hover:bg-slate-50 group">
+                                        <div className="flex items-center gap-3">
+                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm ${acc.type === 'CASH' ? 'bg-emerald-100 text-emerald-600' : 'bg-blue-100 text-blue-600'}`}>
+                                                {acc.type === 'CASH' ? '💵' : '🏦'}
+                                            </div>
+                                            <div>
+                                                <h4 className="font-bold text-slate-800 text-sm">{acc.name}</h4>
+                                                <span className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-500 font-medium">
+                                                    {acc.type === 'INVESTMENT' ? 'Inversión' : acc.type === 'CASH' ? 'Efectivo' : 'Banco'}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="text-sm font-bold text-slate-800">{formatCurrency(acc.balance, currency, currencySymbol)}</p>
+                                            <button onClick={() => { setEditingAccount(acc); setShowAccountForm(true); }} className="text-[10px] text-blue-500 hover:underline mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity">Editar</button>
+                                        </div>
+                                    </div>
+                                ))}
+                                {liquidFunds.length === 0 && <p className="p-6 text-center text-slate-400 text-sm">No tienes cuentas registradas.</p>}
+                            </div>
+                        </section>
+
+                        {/* 3. TARJETAS DE CRÉDITO */}
+                        <section>
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="flex items-center gap-3">
+                                    <div className="h-6 w-1 bg-rose-500 rounded-full"></div>
+                                    <h4 className="font-bold text-slate-700">Tarjetas de Crédito</h4>
+                                </div>
+                                <div className="flex gap-2">
+                                    <button onClick={() => { setShowCardExpenseForm(!showCardExpenseForm); setShowAccountForm(false); }} className="text-xs px-3 py-1.5 bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold rounded-lg transition-colors shadow-sm">
+                                        💳 Consumo
+                                    </button>
+                                    <button onClick={() => { setEditingAccount(null); setShowAccountForm(true); setShowCardExpenseForm(false); }} className="text-xs text-slate-500 font-medium hover:underline flex items-center bg-white border border-slate-200 px-2 py-1.5 rounded-lg">
+                                        + Nueva
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="space-y-4">
+                                {showCardExpenseForm && (
+                                    <div className="mb-6 animate-fade-in-down">
+                                        <CardExpenseForm creditCards={creditCards} onSuccess={handleCardExpenseSuccess} onCancel={() => setShowCardExpenseForm(false)} />
+                                    </div>
+                                )}
+
+                                {showAccountForm && (editingAccount?.type === 'CREDIT' || (!editingAccount && showAccountForm)) && (
+                                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 mb-4 animate-fade-in-down">
+                                        <AccountForm initialData={editingAccount} onSuccess={handleAccountSuccess} onCancel={() => setShowAccountForm(false)} onDelete={removeAccount} />
+                                    </div>
+                                )}
+
+                                {creditCards.map(card => (
+                                    <div key={card.id} className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 relative overflow-hidden group">
+                                        <div className="absolute top-0 left-0 w-1 h-full bg-rose-500"></div>
+
+                                        <div className="flex justify-between items-start mb-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-7 bg-slate-800 rounded flex items-center justify-center text-white text-[10px] font-mono">
+                                                    ****
+                                                </div>
+                                                <div>
+                                                    <h4 className="font-bold text-slate-800 text-sm">{card.name}</h4>
+                                                    <p className="text-[10px] text-slate-400">Tarjeta de Crédito</p>
+                                                </div>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Deuda</p>
+                                                <p className="text-lg font-extrabold text-rose-600">{formatCurrency(card.balance, currency, currencySymbol)}</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-3 gap-2 border-t border-slate-50 pt-3">
+                                            <div>
+                                                <p className="text-[10px] text-slate-400 mb-0.5">Corte</p>
+                                                <p className="font-semibold text-slate-700 text-xs">Día {card.cutoffDay || '--'}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] text-slate-400 mb-0.5">Límite Pago</p>
+                                                <p className="font-bold text-rose-600 text-xs">
+                                                    Día {card.paymentLimitDay || '--'}
+                                                    {card.cutoffDay && card.paymentLimitDay && card.paymentLimitDay < card.cutoffDay && (
+                                                        <span className="text-[9px] ml-1 font-normal text-slate-500 block">(Mes Siguiente)</span>
+                                                    )}
+                                                </p>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="text-[10px] text-slate-400 mb-0.5">Límite Crédito</p>
+                                                <p className="font-medium text-slate-600 text-xs">{formatCurrency(card.limit || 0, currency, currencySymbol)}</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="mt-2 pt-2 border-t border-dashed border-slate-100 flex justify-end">
+                                            <button onClick={() => { setEditingAccount(card); setShowAccountForm(true); setShowCardExpenseForm(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="text-[10px] px-2 py-1 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded transition-colors font-medium">
+                                                Editar
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                                {creditCards.length === 0 && (
+                                    <div className="bg-white p-6 rounded-2xl border border-dashed border-slate-200 text-center text-slate-400 text-xs">
+                                        No tienes tarjetas de crédito.
+                                    </div>
+                                )}
+                            </div>
+                        </section>
+
+                    </div>
+
+                    {/* RIGHT COLUMN: GASTOS FIJOS (LONG LIST) */}
+                    <div className="space-y-8">
+                        <section className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col">
+                            <div className="p-5 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                                <div className="flex items-center gap-3">
+                                    <div className="h-6 w-1 bg-rose-500 rounded-full"></div>
+                                    <h4 className="font-bold text-slate-700">Gastos Fijos Mensuales</h4>
+                                </div>
                                 <button onClick={() => { setEditingFixedExpense(null); setShowFixedExpenseForm(!showFixedExpenseForm); }} className="text-xs bg-white border border-slate-200 hover:bg-rose-50 text-slate-600 px-3 py-1.5 rounded-lg transition-colors font-medium">
                                     + Agregar
                                 </button>
@@ -129,7 +264,7 @@ export default function CuentasPage() {
                                 </div>
                             )}
 
-                            <div className="divide-y divide-slate-100 flex-grow">
+                            <div className="divide-y divide-slate-100">
                                 {fixedExpenses.map(exp => {
                                     // Calculate Next Payment Date intelligently
                                     const today = new Date();
@@ -183,147 +318,9 @@ export default function CuentasPage() {
                                 <span className="text-xs font-bold text-slate-500 uppercase">Total Gastos Fijos</span>
                                 <span className="font-bold text-slate-700">{formatCurrency(totalFixedExpense, currency, currencySymbol)}</span>
                             </div>
-                        </div>
+                        </section>
                     </div>
-                </section>
 
-                {/* SECTION 2 & 3: ACTIVOS Y PASIVOS */}
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-
-                    {/* ACTIVOS (BANCOS) */}
-                    <section>
-                        <div className="flex items-center gap-3 mb-6">
-                            <div className="h-8 w-1 bg-emerald-500 rounded-full"></div>
-                            <h3 className="text-xl font-bold text-slate-800">Disponibilidad (Cuentas y Fondos)</h3>
-                        </div>
-
-                        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-                            <div className="p-4 bg-slate-50 border-b border-slate-100 flex justify-end">
-                                <button onClick={() => { setEditingAccount(null); setShowAccountForm(!showAccountForm); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="text-xs bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 px-3 py-1.5 rounded-lg transition-colors font-medium">
-                                    + Nueva Cuenta / Fondo
-                                </button>
-                            </div>
-
-                            {/* Reuse Account Form just for generic accounts if needed here */}
-                            {showAccountForm && !editingAccount?.type?.includes('CREDIT') && (
-                                <div className="p-6 bg-slate-50 border-b border-slate-100">
-                                    <AccountForm initialData={editingAccount} onSuccess={handleAccountSuccess} onCancel={() => setShowAccountForm(false)} onDelete={removeAccount} />
-                                </div>
-                            )}
-
-                            <div className="divide-y divide-slate-100">
-                                {liquidFunds.map(acc => (
-                                    <div key={acc.id} className="p-6 flex justify-between items-center hover:bg-slate-50 group">
-                                        <div className="flex items-center gap-4">
-                                            <div className={`w-10 h-10 rounded-full flex items-center justify-center text-xl ${acc.type === 'CASH' ? 'bg-emerald-100 text-emerald-600' : 'bg-blue-100 text-blue-600'}`}>
-                                                {acc.type === 'CASH' ? '💵' : '🏦'}
-                                            </div>
-                                            <div>
-                                                <h4 className="font-bold text-slate-800">{acc.name}</h4>
-                                                <span className="text-xs px-2 py-0.5 rounded bg-slate-100 text-slate-500 font-medium">
-                                                    {acc.type === 'INVESTMENT' ? 'Fondo Inversión' : acc.type === 'CASH' ? 'Efectivo' : 'Cuenta Banco'}
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <div className="text-right">
-                                            <p className="text-xl font-bold text-slate-800">{formatCurrency(acc.balance, currency, currencySymbol)}</p>
-                                            <button onClick={() => { setEditingAccount(acc); setShowAccountForm(true); }} className="text-xs text-blue-500 hover:underline mt-1 opacity-0 group-hover:opacity-100 transition-opacity">Editar / Eliminar</button>
-                                        </div>
-                                    </div>
-                                ))}
-                                {liquidFunds.length === 0 && <p className="p-8 text-center text-slate-400">No tienes cuentas registradas.</p>}
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* PASIVOS (TARJETAS) */}
-                    <section>
-                        <div className="flex items-center gap-3 mb-6">
-                            <div className="h-8 w-1 bg-rose-500 rounded-full"></div>
-                            <h3 className="text-xl font-bold text-slate-800">Tarjetas de Crédito y Deudas</h3>
-                        </div>
-
-                        <div className="space-y-4">
-                            <div className="flex justify-end gap-3">
-                                <button onClick={() => { setShowCardExpenseForm(!showCardExpenseForm); setShowAccountForm(false); }} className="text-sm px-4 py-2 bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold rounded-xl transition-colors shadow-sm">
-                                    💳 Registrar Consumo
-                                </button>
-                                <button onClick={() => { setEditingAccount(null); setShowAccountForm(true); setShowCardExpenseForm(false); }} className="text-sm text-slate-500 font-medium hover:underline flex items-center">
-                                    + Nueva Tarjeta
-                                </button>
-                            </div>
-
-                            {showCardExpenseForm && (
-                                <div className="mb-6 animate-fade-in-down">
-                                    <CardExpenseForm creditCards={creditCards} onSuccess={handleCardExpenseSuccess} onCancel={() => setShowCardExpenseForm(false)} />
-                                </div>
-                            )}
-
-                            {showAccountForm && (editingAccount?.type === 'CREDIT' || (!editingAccount && showAccountForm)) && (
-                                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 mb-4 animate-fade-in-down">
-                                    <AccountForm initialData={editingAccount} onSuccess={handleAccountSuccess} onCancel={() => setShowAccountForm(false)} onDelete={removeAccount} />
-                                </div>
-                            )}
-
-                            {creditCards.map(card => (
-                                <div key={card.id} className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 relative overflow-hidden group">
-                                    <div className="absolute top-0 left-0 w-1 h-full bg-rose-500"></div>
-
-                                    <div className="flex justify-between items-start mb-6">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-12 h-8 bg-slate-800 rounded md:w-16 md:h-10 flex items-center justify-center text-white text-xs font-mono">
-                                                ****
-                                            </div>
-                                            <div>
-                                                <h4 className="font-bold text-slate-800 text-lg">{card.name}</h4>
-                                                <p className="text-xs text-slate-400">Tarjeta de Crédito</p>
-                                            </div>
-                                        </div>
-                                        <div className="text-right">
-                                            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Deuda Actual</p>
-                                            <p className="text-2xl font-extrabold text-rose-600">{formatCurrency(card.balance, currency, currencySymbol)}</p>
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-3 gap-4 border-t border-slate-50 pt-4">
-                                        <div>
-                                            <p className="text-xs text-slate-400 mb-1">Fecha Corte</p>
-                                            <p className="font-semibold text-slate-700">Día {card.cutoffDay || '--'}</p>
-                                        </div>
-                                        <div>
-                                            <p className="text-xs text-slate-400 mb-1">Fecha Límite Pago</p>
-                                            <p className="font-bold text-rose-600">
-                                                Día {card.paymentLimitDay || '--'}
-                                                {card.cutoffDay && card.paymentLimitDay && card.paymentLimitDay < card.cutoffDay && (
-                                                    <span className="text-[10px] ml-1 font-normal text-slate-500">(Mes Siguiente)</span>
-                                                )}
-                                            </p>
-                                        </div>
-                                        <div className="text-right">
-                                            <p className="text-xs text-slate-400 mb-1">Límite Crédito</p>
-                                            <p className="font-medium text-slate-600">{formatCurrency(card.limit || 0, currency, currencySymbol)}</p>
-                                        </div>
-                                    </div>
-
-                                    <div className="mt-4 pt-4 border-t border-dashed border-slate-100">
-                                        <div className="flex justify-between items-center">
-                                            <p className="text-xs text-slate-400 italic">
-                                                Tus consumos se reflejan en Gastos.
-                                            </p>
-                                            <button onClick={() => { setEditingAccount(card); setShowAccountForm(true); setShowCardExpenseForm(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="text-xs px-3 py-1 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-lg transition-colors font-medium">
-                                                Editar Saldo / Fechas
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                            {creditCards.length === 0 && (
-                                <div className="bg-white p-8 rounded-2xl border border-dashed border-slate-200 text-center text-slate-400">
-                                    No tienes tarjetas de crédito registradas.
-                                </div>
-                            )}
-                        </div>
-                    </section>
                 </div>
             </div>
         </Layout>
