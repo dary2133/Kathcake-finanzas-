@@ -80,7 +80,6 @@ export default function TransactionList({ transactions, onDelete, onEdit, onRese
                                                 onClick={async () => {
                                                     if (window.confirm('¿Eliminar este registro?')) {
                                                         if (onDelete) await onDelete(t.id);
-                                                        window.location.reload();
                                                     }
                                                 }}
                                                 className="text-rose-600 hover:bg-rose-50 py-1 px-3 rounded-lg transition-all border border-rose-100 bg-white text-xs font-bold flex items-center gap-1"

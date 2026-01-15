@@ -150,6 +150,19 @@ export default function AccountForm({ initialData, onSuccess, onCancel, onDelete
                         Cancelar
                     </button>
                 )}
+                {initialData && onDelete && (
+                    <button
+                        type="button"
+                        onClick={() => {
+                            if (window.confirm('¿Estás seguro de que deseas eliminar esta cuenta?')) {
+                                onDelete(initialData.id);
+                            }
+                        }}
+                        className="py-3 px-4 rounded-xl text-rose-600 font-medium bg-rose-50 hover:bg-rose-100 border border-rose-200 transition-colors"
+                    >
+                        Eliminar
+                    </button>
+                )}
                 <button
                     type="submit"
                     className="flex-1 py-3 px-4 rounded-xl text-white font-medium bg-purple-600 hover:bg-purple-700 transition-colors"

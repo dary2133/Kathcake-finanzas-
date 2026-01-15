@@ -93,6 +93,19 @@ export default function FixedExpenseForm({ initialData, onSuccess, onCancel, onD
                         Cancelar
                     </button>
                 )}
+                {initialData && onDelete && (
+                    <button
+                        type="button"
+                        onClick={() => {
+                            if (window.confirm('¿Estás seguro de que deseas eliminar este gasto fijo?')) {
+                                onDelete(initialData.id);
+                            }
+                        }}
+                        className="py-3 px-4 rounded-xl text-rose-600 font-medium bg-rose-50 hover:bg-rose-100 border border-rose-200 transition-colors"
+                    >
+                        Eliminar
+                    </button>
+                )}
                 <button
                     type="submit"
                     className="flex-1 py-3 px-4 rounded-xl text-white font-medium bg-slate-800 hover:bg-slate-900 transition-colors"
@@ -100,6 +113,6 @@ export default function FixedExpenseForm({ initialData, onSuccess, onCancel, onD
                     {initialData ? 'Actualizar' : 'Guardar'} Gasto Fijo
                 </button>
             </div>
-        </form>
+        </form >
     );
 }
