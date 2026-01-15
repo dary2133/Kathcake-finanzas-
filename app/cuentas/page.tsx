@@ -67,6 +67,58 @@ export default function CuentasPage() {
                         <p className={`text-3xl font-extrabold ${netMonthlyFlow >= 0 ? 'text-blue-600' : 'text-orange-600'}`}>
                             {netMonthlyFlow > 0 ? '+' : ''}{formatCurrency(netMonthlyFlow, currency, currencySymbol)}
                         </p>
+
+                        {/* Dynamic Period Analysis */}
+                        <div className="mt-4 pt-4 border-t border-dashed border-slate-200 text-xs space-y-2">
+                            {(function () {
+                                // 1. Get unique Income Days sorted
+                                const incomeDays = Array.from(new Set(fixedIncomes.map(i => i.paymentDay || 1))).sort((a, b) => a - b);
+
+                                if (incomeDays.length <= 1) return null; // No breakdown needed if single income source or none
+
+                                return incomeDays.map((startDay, index) => {
+                                    const nextStartDay = incomeDays[(index + 1) % incomeDays.length];
+
+                                    // Calculate Period Interval Visuals
+                                    const isLast = index === incomeDays.length - 1;
+                                    const rangeLabel = isLast
+                                        ? `Día ${startDay} - ${nextStartDay - 1} (prox. mes)`
+                                        : `Día ${startDay} - ${nextStartDay - 1}`;
+
+                                    // Calculate Income for this period (incomes ON this startDay)
+                                    const periodIncome = fixedIncomes
+                                        .filter(i => (i.paymentDay || 1) === startDay)
+                                        .reduce((sum, i) => sum + i.amount, 0);
+
+                                    // Calculate Expenses for this period
+                                    // An expense falls in this period if:
+                                    // Case A (Non-wrapping): Start < Next. Expense E is Start <= E < Next.
+                                    // Case B (Wrapping): Start > Next (End of month). Expense E is E >= Start OR E < Next.
+                                    const periodExpense = fixedExpenses.reduce((sum, exp) => {
+                                        const day = exp.paymentLimitDay || 1;
+                                        let inPeriod = false;
+                                        if (startDay < nextStartDay) {
+                                            if (day >= startDay && day < nextStartDay) inPeriod = true;
+                                        } else {
+                                            // Wrapping case
+                                            if (day >= startDay || day < nextStartDay) inPeriod = true;
+                                        }
+                                        return inPeriod ? sum + exp.amount : sum;
+                                    }, 0);
+
+                                    const balance = periodIncome - periodExpense;
+
+                                    return (
+                                        <div key={startDay} className="flex justify-between items-center">
+                                            <span className="text-slate-500 font-medium">{rangeLabel}</span>
+                                            <span className={`font-bold ${balance >= 0 ? 'text-blue-600' : 'text-orange-500'}`}>
+                                                {balance > 0 ? '+' : ''}{formatCurrency(balance, currency, currencySymbol)}
+                                            </span>
+                                        </div>
+                                    );
+                                });
+                            })()}
+                        </div>
                     </div>
                 </div>
 
