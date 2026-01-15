@@ -70,17 +70,80 @@ export default function Dashboard() {
                 />
             </div>
 
-            {/* Pending Section */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                    <h3 className="text-lg font-semibold text-slate-700 mb-4">Por Cobrar</h3>
-                    <p className="text-3xl font-bold text-blue-600">{formatCurrency(pendingIncome, settings.currency, currencySymbol)}</p>
-                    <p className="text-sm text-slate-400 mt-2">{transactions.filter(t => t.type === 'INCOME' && t.status === 'PENDING').length} transacciones pendientes</p>
+            {/* Detailed Grouped Summary */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Ventas Summary */}
+                <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                    <div className="bg-emerald-600 p-4">
+                        <h3 className="text-white font-bold text-center uppercase tracking-widest text-sm">Ventas Kathcake 2025</h3>
+                    </div>
+                    <div className="bg-emerald-500/10 grid grid-cols-2 border-b border-emerald-100 italic">
+                        <div className="p-2 text-emerald-800 font-bold text-xs text-center border-r border-emerald-100">PRODUCTO / SERVICIO</div>
+                        <div className="p-2 text-emerald-800 font-bold text-xs text-center">MONTO</div>
+                    </div>
+                    <div className="divide-y divide-slate-100 max-h-[500px] overflow-auto">
+                        {(function () {
+                            const salesData = transactions
+                                .filter(t => t.type === 'INCOME')
+                                .reduce((acc, t) => {
+                                    const key = t.description || 'Otros Ingresos';
+                                    acc[key] = (acc[key] || 0) + t.amount;
+                                    return acc;
+                                }, {} as Record<string, number>);
+
+                            const sortedSales = Object.entries(salesData).sort((a, b) => b[1] - a[1]);
+
+                            if (sortedSales.length === 0) return <p className="p-6 text-center text-slate-400 text-xs italic">No hay ventas registradas.</p>;
+
+                            return sortedSales.map(([name, total], index) => (
+                                <div key={name} className={`grid grid-cols-2 ${index % 2 === 0 ? 'bg-slate-50/50' : 'bg-white'}`}>
+                                    <div className="p-3 text-[11px] font-bold text-slate-600 uppercase border-r border-slate-100">{name}</div>
+                                    <div className="p-3 text-[11px] font-bold text-slate-700 text-right">{formatCurrency(total, settings.currency, currencySymbol)}</div>
+                                </div>
+                            ));
+                        })()}
+                    </div>
+                    <div className="bg-emerald-600 grid grid-cols-2 p-3">
+                        <div className="text-white font-black text-xs uppercase text-center">Total de Ventas</div>
+                        <div className="text-white font-black text-xs text-right">{formatCurrency(totalIncome, settings.currency, currencySymbol)}</div>
+                    </div>
                 </div>
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                    <h3 className="text-lg font-semibold text-slate-700 mb-4">Por Pagar</h3>
-                    <p className="text-3xl font-bold text-orange-600">{formatCurrency(pendingExpense, settings.currency, currencySymbol)}</p>
-                    <p className="text-sm text-slate-400 mt-2">{transactions.filter(t => t.type === 'EXPENSE' && t.status === 'PENDING').length} facturas pendientes</p>
+
+                {/* Gastos Summary */}
+                <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                    <div className="bg-rose-600 p-4">
+                        <h3 className="text-white font-bold text-center uppercase tracking-widest text-sm">Gastos Kathcake 2025</h3>
+                    </div>
+                    <div className="bg-rose-500/10 grid grid-cols-2 border-b border-rose-100 italic">
+                        <div className="p-2 text-rose-800 font-bold text-xs text-center border-r border-rose-100">DESCRIPCIÓN GASTO</div>
+                        <div className="p-2 text-rose-800 font-bold text-xs text-center">MONTO</div>
+                    </div>
+                    <div className="divide-y divide-slate-100 max-h-[500px] overflow-auto">
+                        {(function () {
+                            const expenseData = transactions
+                                .filter(t => t.type === 'EXPENSE')
+                                .reduce((acc, t) => {
+                                    const key = t.description || 'Otros Gastos';
+                                    acc[key] = (acc[key] || 0) + t.amount;
+                                    return acc;
+                                }, {} as Record<string, number>);
+
+                            const sortedExpenses = Object.entries(expenseData).sort((a, b) => b[1] - a[1]);
+
+                            if (sortedExpenses.length === 0) return <p className="p-6 text-center text-slate-400 text-xs italic">No hay gastos registrados.</p>;
+
+                            return sortedExpenses.map(([name, total], index) => (
+                                <div key={name} className={`grid grid-cols-2 ${index % 2 === 0 ? 'bg-slate-50/50' : 'bg-white'}`}>
+                                    <div className="p-3 text-[11px] font-bold text-slate-600 uppercase border-r border-slate-100">{name}</div>
+                                    <div className="p-3 text-[11px] font-bold text-slate-700 text-right">{formatCurrency(total, settings.currency, currencySymbol)}</div>
+                                </div>
+                            ));
+                        })()}
+                    </div>
+                    <div className="bg-rose-600 grid grid-cols-2 p-3">
+                        <div className="text-white font-black text-xs uppercase text-center">Total de Gastos</div>
+                        <div className="text-white font-black text-xs text-right">{formatCurrency(totalExpense, settings.currency, currencySymbol)}</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -103,9 +166,10 @@ function SummaryCard({ title, amount, type, symbol, currency, isNet = false }: {
     return (
         <div className={`${bgClass} p-6 rounded-2xl shadow-sm border border-slate-100 transition-transform hover:-translate-y-1`}>
             <h3 className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-2">{title}</h3>
-            <p className={`text-4xl font-extrabold ${colorClass}`}>
+            <p className={`text-3xl font-extrabold ${colorClass}`}>
                 {formatCurrency(Math.abs(amount), currency || 'DOP', symbol)}
             </p>
         </div>
     );
 }
+
