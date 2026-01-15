@@ -77,9 +77,9 @@ export default function CuentasPage() {
                         <h3 className="text-xl font-bold text-slate-800">Flujo Fijo Mensual</h3>
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
                         {/* INGRESOS FIJOS */}
-                        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col h-full">
+                        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col">
                             <div className="p-5 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
                                 <h4 className="font-semibold text-slate-700">Ingresos Fijos Estipulados</h4>
                                 <button onClick={() => { setEditingFixedIncome(null); setShowFixedIncomeForm(!showFixedIncomeForm); }} className="text-xs bg-white border border-slate-200 hover:bg-emerald-50 text-slate-600 px-3 py-1.5 rounded-lg transition-colors font-medium">
@@ -93,7 +93,7 @@ export default function CuentasPage() {
                                 </div>
                             )}
 
-                            <div className="divide-y divide-slate-100 flex-grow">
+                            <div className="divide-y divide-slate-100">
                                 {fixedIncomes.map(inc => (
                                     <div key={inc.id} className="p-4 flex justify-between items-center group hover:bg-slate-50">
                                         <div>
@@ -115,7 +115,7 @@ export default function CuentasPage() {
                         </div>
 
                         {/* GASTOS FIJOS */}
-                        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col h-full">
+                        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col">
                             <div className="p-5 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
                                 <h4 className="font-semibold text-slate-700">Gastos Fijos Mensuales</h4>
                                 <button onClick={() => { setEditingFixedExpense(null); setShowFixedExpenseForm(!showFixedExpenseForm); }} className="text-xs bg-white border border-slate-200 hover:bg-rose-50 text-slate-600 px-3 py-1.5 rounded-lg transition-colors font-medium">
