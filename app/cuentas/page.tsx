@@ -130,18 +130,40 @@ export default function CuentasPage() {
                             )}
 
                             <div className="divide-y divide-slate-100 flex-grow">
-                                {fixedExpenses.map(exp => (
-                                    <div key={exp.id} className="p-4 flex justify-between items-center group hover:bg-slate-50">
-                                        <div>
-                                            <p className="font-medium text-slate-800">{exp.name}</p>
-                                            <p className="text-xs text-slate-400">Límite pago: Día {exp.paymentLimitDay || 'N/A'}</p>
+                                {fixedExpenses.map(exp => {
+                                    // Calculate Next Payment Date
+                                    const today = new Date();
+                                    const day = exp.paymentLimitDay || 1;
+                                    let targetMonth = today.getMonth();
+                                    let targetYear = today.getFullYear();
+
+                                    if (day < today.getDate()) {
+                                        targetMonth++;
+                                        if (targetMonth > 11) { targetMonth = 0; targetYear++; }
+                                    }
+                                    const nextDate = new Date(targetYear, targetMonth, day);
+                                    const dateString = nextDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'long' });
+                                    const daysLeft = Math.ceil((nextDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+                                    const isUrgent = daysLeft <= 5 && daysLeft >= 0;
+
+                                    return (
+                                        <div key={exp.id} className="p-4 flex justify-between items-center group hover:bg-slate-50">
+                                            <div>
+                                                <p className="font-medium text-slate-800">{exp.name}</p>
+                                                <div className="flex items-center gap-2">
+                                                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${isUrgent ? 'bg-orange-100 text-orange-600' : 'bg-slate-100 text-slate-500'}`}>
+                                                        📅 {dateString}
+                                                    </span>
+                                                    {isUrgent && <span className="text-[10px] text-orange-600 font-bold animate-pulse">¡Pronto!</span>}
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center gap-3">
+                                                <span className="font-bold text-slate-700">{formatCurrency(exp.amount, currency, currencySymbol)}</span>
+                                                <button onClick={() => { setEditingFixedExpense(exp); setShowFixedExpenseForm(true); }} className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-blue-500 transition-all">✏️</button>
+                                            </div>
                                         </div>
-                                        <div className="flex items-center gap-3">
-                                            <span className="font-bold text-slate-700">{formatCurrency(exp.amount, currency, currencySymbol)}</span>
-                                            <button onClick={() => { setEditingFixedExpense(exp); setShowFixedExpenseForm(true); }} className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-blue-500 transition-all">✏️</button>
-                                        </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                                 {fixedExpenses.length === 0 && <p className="p-8 text-center text-slate-400 text-sm">No hay gastos fijos registrados.</p>}
                             </div>
                             <div className="p-4 bg-slate-50 border-t border-slate-100 flex justify-between items-center">
