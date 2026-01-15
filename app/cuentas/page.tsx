@@ -86,21 +86,27 @@ export default function CuentasPage() {
                         {/* Dynamic Period Analysis */}
                         <div className="mt-4 pt-4 border-t border-dashed border-slate-200 text-xs space-y-4">
                             {(function () {
-                                const incomeDays = Array.from(new Set(fixedIncomes.map(i => i.paymentDay || 1))).sort((a, b) => a - b);
-                                if (incomeDays.length === 0) return <p className="text-slate-400 italic">Agrega ingresos para ver el desglose por periodo.</p>;
+                                if (!safeIncomes || safeIncomes.length === 0) return <p className="text-slate-400 italic">Agrega ingresos para ver el desglose por periodo.</p>;
+
+                                const incomeDays = Array.from(new Set(safeIncomes.map(i => i?.paymentDay || 1))).sort((a, b) => a - b);
+
                                 return incomeDays.map((startDay, index) => {
                                     const nextStartDay = incomeDays[(index + 1) % incomeDays.length];
                                     const isLast = index === incomeDays.length - 1;
                                     const rangeLabel = isLast ? `Periodo: Día ${startDay} al ${nextStartDay > 1 ? nextStartDay - 1 : 30} (prox. mes)` : `Periodo: Día ${startDay} al ${nextStartDay - 1}`;
-                                    const periodIncome = fixedIncomes.filter(i => (i.paymentDay || 1) === startDay).reduce((sum, i) => sum + i.amount, 0);
-                                    const expensesInPeriod = fixedExpenses.filter(exp => {
-                                        const day = exp.paymentLimitDay || 1;
+
+                                    const periodIncome = safeIncomes.filter(i => (i?.paymentDay || 1) === startDay).reduce((sum, i) => sum + (i?.amount || 0), 0);
+
+                                    const expensesInPeriod = safeExpenses.filter(exp => {
+                                        const day = exp?.paymentLimitDay || 1;
                                         if (startDay < nextStartDay) return day >= startDay && day < nextStartDay;
                                         else return day >= startDay || day < nextStartDay;
                                     });
-                                    const periodExpenseTotal = expensesInPeriod.reduce((sum, e) => sum + e.amount, 0);
+
+                                    const periodExpenseTotal = expensesInPeriod.reduce((sum, e) => sum + (e?.amount || 0), 0);
                                     const balance = periodIncome - periodExpenseTotal;
-                                    const expenseNames = expensesInPeriod.map(e => e.name).join(', ');
+                                    const expenseNames = expensesInPeriod.map(e => e?.name).join(', ');
+
                                     return (
                                         <div key={startDay} className="bg-white/50 rounded-lg p-2 border border-slate-100">
                                             <div className="flex justify-between items-center mb-1">
@@ -118,12 +124,14 @@ export default function CuentasPage() {
                                                             <span className="block truncate opacity-75">{expenseNames}</span>
                                                             <div className="absolute left-0 bottom-full mb-2 hidden group-hover/tooltip:block bg-slate-800 text-white text-[10px] p-2 rounded-lg shadow-xl z-50 min-w-[200px] border border-slate-700">
                                                                 <p className="font-bold border-b border-slate-600 mb-1 pb-1">Desglose del periodo:</p>
-                                                                {expensesInPeriod.map(e => (
-                                                                    <div key={e.id} className="flex justify-between gap-4 py-0.5">
-                                                                        <span>{e.name}</span>
-                                                                        <span className="font-mono text-rose-300">{formatCurrency(e.amount, currency, currencySymbol)}</span>
-                                                                    </div>
-                                                                ))}
+                                                                <div className="max-h-[150px] overflow-y-auto">
+                                                                    {expensesInPeriod.map(e => (
+                                                                        <div key={e?.id} className="flex justify-between gap-4 py-0.5">
+                                                                            <span>{e?.name}</span>
+                                                                            <span className="font-mono text-rose-300">{formatCurrency(e?.amount || 0, currency, currencySymbol)}</span>
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
                                                                 <div className="absolute top-full left-4 w-2 h-2 bg-slate-800 rotate-45 -translate-y-1"></div>
                                                             </div>
                                                         </>

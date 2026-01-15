@@ -100,14 +100,14 @@ export default function CuentasPage() {
                                     <div className="flex justify-between text-[10px] relative group/tooltip">
                                         <span className="text-slate-500 font-medium cursor-help hover:text-slate-700 transition-colors">Gastos Operativos Fijos</span>
                                         <span className="text-rose-500 font-bold">-{formatCurrency(totalFixedExpense, currency, currencySymbol)}</span>
-                                        {fixedExpenses.length > 0 && (
+                                        {safeExpenses && safeExpenses.length > 0 && (
                                             <div className="absolute left-0 bottom-full mb-2 hidden group-hover/tooltip:block bg-slate-800 text-white text-[10px] p-2 rounded-lg shadow-xl z-50 min-w-[220px] border border-slate-700">
                                                 <p className="font-bold border-b border-slate-600 mb-2 pb-1 text-slate-300 uppercase tracking-wider">Desglose Gastos Operativos:</p>
                                                 <div className="space-y-1 max-h-[200px] overflow-y-auto pr-1">
-                                                    {fixedExpenses.map(e => (
-                                                        <div key={e.id} className="flex justify-between gap-4 py-0.5 border-b border-slate-700/50 last:border-0">
-                                                            <span className="truncate">{e.name}</span>
-                                                            <span className="font-mono text-rose-300 flex-shrink-0">{formatCurrency(e.amount, currency, currencySymbol)}</span>
+                                                    {safeExpenses.map(e => (
+                                                        <div key={e?.id} className="flex justify-between gap-4 py-0.5 border-b border-slate-700/50 last:border-0">
+                                                            <span className="truncate">{e?.name}</span>
+                                                            <span className="font-mono text-rose-300 flex-shrink-0">{formatCurrency(e?.amount || 0, currency, currencySymbol)}</span>
                                                         </div>
                                                     ))}
                                                 </div>
