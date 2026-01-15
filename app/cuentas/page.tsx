@@ -292,7 +292,12 @@ export default function CuentasPage() {
                                         </div>
                                         <div>
                                             <p className="text-xs text-slate-400 mb-1">Fecha Límite Pago</p>
-                                            <p className="font-bold text-rose-600">Día {card.paymentLimitDay || '--'}</p>
+                                            <p className="font-bold text-rose-600">
+                                                Día {card.paymentLimitDay || '--'}
+                                                {card.cutoffDay && card.paymentLimitDay && card.paymentLimitDay < card.cutoffDay && (
+                                                    <span className="text-[10px] ml-1 font-normal text-slate-500">(Mes Siguiente)</span>
+                                                )}
+                                            </p>
                                         </div>
                                         <div className="text-right">
                                             <p className="text-xs text-slate-400 mb-1">Límite Crédito</p>
