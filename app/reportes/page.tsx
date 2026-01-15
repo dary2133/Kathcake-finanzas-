@@ -6,32 +6,40 @@ import { useTransactions, useSettings } from '../lib/hooks';
 import { formatCurrency } from '@/app/lib/utils';
 
 export default function ReportesPage() {
+    // We fetch all transactions but filter for Kathcake + Uncategorized as business data
     const { transactions, loading } = useTransactions();
     const { settings } = useSettings();
     const { currencySymbol } = settings;
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
-    // --- Aggregation Logic ---
+    // --- Business Logic Integration ---
+    const businessTransactions = useMemo(() => {
+        // As per USER request, Reports is for Kathcake. 
+        // We include explicit KATHCAKE items OR uncategorized items (old data/default)
+        return transactions.filter(t => t.transactionCategory === 'KATHCAKE' || !t.transactionCategory);
+    }, [transactions]);
+
+    // --- Aggregation Logic (Uses businessTransactions) ---
 
     // 1. Annual Summary
     const annualSummary = useMemo(() => {
-        const years = Array.from(new Set(transactions.map(t => new Date(t.date).getFullYear()))).sort((a, b) => b - a);
+        const years = Array.from(new Set(businessTransactions.map(t => new Date(t.date).getFullYear()))).sort((a, b) => b - a);
         if (!years.includes(selectedYear)) years.push(selectedYear);
 
         return years.map(year => {
-            const yearTrans = transactions.filter(t => new Date(t.date).getFullYear() === year && t.status === 'PAID');
+            const yearTrans = businessTransactions.filter(t => new Date(t.date).getFullYear() === year && t.status === 'PAID');
             const sales = yearTrans.filter(t => t.type === 'INCOME').reduce((sum, t) => sum + t.amount, 0);
             const expenses = yearTrans.filter(t => t.type === 'EXPENSE').reduce((sum, t) => sum + t.amount, 0);
             return { year, sales, expenses, savings: sales - expenses };
         }).sort((a, b) => b.year - a.year);
-    }, [transactions, selectedYear]);
+    }, [businessTransactions, selectedYear]);
 
     // 2. Monthly Summary (for Selected Year)
     const monthlySummary = useMemo(() => {
         const months = Array.from({ length: 12 }, (_, i) => i); // 0-11
 
         return months.map(month => {
-            const monthTrans = transactions.filter(t => {
+            const monthTrans = businessTransactions.filter(t => {
                 const d = new Date(t.date);
                 return d.getFullYear() === selectedYear && d.getMonth() === month && t.status === 'PAID';
             });
@@ -46,16 +54,16 @@ export default function ReportesPage() {
                 savings: sales - expenses
             };
         });
-    }, [transactions, selectedYear]);
+    }, [businessTransactions, selectedYear]);
 
     // 3. Category Breakdown (for Selected Year)
     const categoryBreakdown = useMemo(() => {
-        const yearTrans = transactions.filter(t => new Date(t.date).getFullYear() === selectedYear && t.status === 'PAID');
+        const yearTrans = businessTransactions.filter(t => new Date(t.date).getFullYear() === selectedYear && t.status === 'PAID');
 
         const groupByCategory = (type: 'INCOME' | 'EXPENSE') => {
             const groups: Record<string, number> = {};
             yearTrans.filter(t => t.type === type).forEach(t => {
-                const key = t.description || t.category;
+                const key = t.description || t.category || 'Otros';
                 groups[key] = (groups[key] || 0) + t.amount;
             });
             return Object.entries(groups)
@@ -67,7 +75,7 @@ export default function ReportesPage() {
             income: groupByCategory('INCOME'),
             expense: groupByCategory('EXPENSE')
         };
-    }, [transactions, selectedYear]);
+    }, [businessTransactions, selectedYear]);
 
 
     // --- Helper Components ---
@@ -130,8 +138,8 @@ export default function ReportesPage() {
             <div className="space-y-8">
                 <div className="flex justify-between items-center">
                     <div>
-                        <h2 className="text-3xl font-bold text-slate-800">Reportes Financieros</h2>
-                        <p className="text-slate-500">Análisis detallado de tu negocio.</p>
+                        <h2 className="text-3xl font-bold text-slate-800">Reportes Kathcake</h2>
+                        <p className="text-slate-500">Análisis detallado del rendimiento de tu negocio.</p>
                     </div>
 
                     <select
@@ -149,8 +157,8 @@ export default function ReportesPage() {
 
                     {/* 1. Annual Summary Table */}
                     <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                        <h3 className="text-lg font-bold text-white bg-slate-800 p-3 rounded-t-lg text-center uppercase tracking-wider">
-                            Resumen Ventas y Gastos Anuales
+                        <h3 className="text-lg font-bold text-white bg-emerald-600 p-3 rounded-t-lg text-center uppercase tracking-wider">
+                            Resumen Anual del Negocio
                         </h3>
                         <div className="overflow-x-auto">
                             <table className="w-full text-center">
@@ -159,12 +167,12 @@ export default function ReportesPage() {
                                         <th className="py-3 px-2">Año</th>
                                         <th className="py-3 px-2">Ventas</th>
                                         <th className="py-3 px-2">Gastos</th>
-                                        <th className="py-3 px-2">Ahorro Anual</th>
+                                        <th className="py-3 px-2">Utilidad Anual</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100 text-sm">
                                     {annualSummary.map((row) => (
-                                        <tr key={row.year} className={row.year === selectedYear ? 'bg-purple-50' : ''}>
+                                        <tr key={row.year} className={row.year === selectedYear ? 'bg-emerald-50' : ''}>
                                             <td className="py-3 font-bold text-slate-700">{row.year}</td>
                                             <td className="py-3 text-emerald-600 font-bold">{formatCurrency(row.sales, settings.currency, currencySymbol)}</td>
                                             <td className="py-3 text-rose-600 font-bold">{formatCurrency(row.expenses, settings.currency, currencySymbol)}</td>
@@ -181,8 +189,7 @@ export default function ReportesPage() {
                     {/* 2. Monthly Summary Table */}
                     <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
                         <div className="flex justify-between items-center bg-slate-800 p-3 rounded-t-lg">
-                            <h3 className="text-lg font-bold text-white uppercase tracking-wider">Resumen Mensual</h3>
-                            <span className="text-white font-bold bg-slate-700 px-2 rounded">{selectedYear}</span>
+                            <h3 className="text-lg font-bold text-white uppercase tracking-wider">Flujo Mensual {selectedYear}</h3>
                         </div>
                         <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
                             <table className="w-full text-center">
@@ -191,7 +198,7 @@ export default function ReportesPage() {
                                         <th className="py-3 px-2">Mes</th>
                                         <th className="py-3 px-2">Ventas</th>
                                         <th className="py-3 px-2">Gastos</th>
-                                        <th className="py-3 px-2">Ahorro</th>
+                                        <th className="py-3 px-2">Utilidad</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100 text-sm">
@@ -218,7 +225,7 @@ export default function ReportesPage() {
                     {/* Income Chart & List */}
                     <div className="space-y-6">
                         <div className="bg-emerald-50 p-4 rounded-xl text-center border border-emerald-100">
-                            <h3 className="text-xl font-bold text-emerald-800 uppercase">Ventas Kathcake {selectedYear}</h3>
+                            <h3 className="text-xl font-bold text-emerald-800 uppercase">Detalle de Ventas {selectedYear}</h3>
                         </div>
 
                         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col md:flex-row gap-8 items-center md:items-start">
@@ -255,7 +262,7 @@ export default function ReportesPage() {
                     {/* Expenses Chart & List */}
                     <div className="space-y-6">
                         <div className="bg-rose-50 p-4 rounded-xl text-center border border-rose-100">
-                            <h3 className="text-xl font-bold text-rose-800 uppercase">Gastos Kathcake {selectedYear}</h3>
+                            <h3 className="text-xl font-bold text-rose-800 uppercase">Detalle de Gastos {selectedYear}</h3>
                         </div>
 
                         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col md:flex-row gap-8 items-center md:items-start">
