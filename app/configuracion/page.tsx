@@ -5,7 +5,7 @@ import Layout from '../components/Layout';
 import { useSettings } from '../lib/hooks';
 import { updateSettings } from '../lib/actions';
 import { AppSettings } from '../lib/types';
-import DataMigration from '../components/DataMigration';
+
 
 export default function ConfiguracionPage() {
     const { settings, refreshSettings } = useSettings();
@@ -109,7 +109,7 @@ export default function ConfiguracionPage() {
                     </div>
                 </form>
 
-                <DataMigration />
+
 
                 {showToast && (
                     <div className="fixed bottom-8 right-8 bg-emerald-600 text-white px-6 py-3 rounded-xl shadow-lg animate-fade-in-up">
