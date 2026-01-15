@@ -15,27 +15,28 @@ export default function FixedExpenseForm({ initialData, onSuccess, onCancel, onD
     const [name, setName] = useState(initialData?.name || '');
     const [amount, setAmount] = useState(initialData?.amount?.toString() || '');
 
-    // Initialize date: Create a date object for the stored day, defaulting to today or next occurrence
+    // Initialize date: Create a date object matching the next payment occurrence
     const calculateInitialDate = () => {
         if (!initialData?.paymentLimitDay) return new Date().toISOString().split('T')[0];
+
         const today = new Date();
-        const year = today.getFullYear();
-        const month = today.getMonth(); // 0-based
-        const day = initialData.paymentLimitDay; // e.g. 5
+        const day = initialData.paymentLimitDay;
 
-        // If the day is valid for this month, use it. If not (e.g. Feb 30), JS auto-corrects or we could clamp.
-        // Let's just create a date for this month/day.
-        // Note: We just want to show the correct DAY in the picker. Month/Year don't matter as much, 
-        // but showing the "Next" occurrence is nice.
-        let targetMonth = month;
-        let targetYear = year;
+        // Create candidate date for this month
+        let targetDate = new Date(today.getFullYear(), today.getMonth(), day);
 
-        // If today is past the day, maybe default to next month? 
-        // User asked to "Start date", so let's just default to current month/year + the day.
+        // If the day for this month has already passed, show next month's date
+        // Note: We check if the day part is less than today's day to be simple, 
+        // or compare timestamps. Comparing date objects directly works.
+        if (targetDate < today) {
+            targetDate.setMonth(targetDate.getMonth() + 1);
+        }
 
-        // Safe creation handling months with fewer days
-        const date = new Date(targetYear, targetMonth, day);
-        return date.toISOString().split('T')[0];
+        const yyp = targetDate.getFullYear();
+        const mmp = String(targetDate.getMonth() + 1).padStart(2, '0');
+        const ddp = String(day).padStart(2, '0');
+
+        return `${yyp}-${mmp}-${ddp}`;
     };
 
     const [paymentDate, setPaymentDate] = useState(calculateInitialDate());
