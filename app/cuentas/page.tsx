@@ -274,18 +274,28 @@ export default function CuentasPage() {
                             )}
                             <div className="divide-y divide-slate-50 text-sm">
                                 {safeExpenses.length === 0 ? <p className="p-8 text-center text-slate-400">No hay gastos fijos.</p> :
-                                    safeExpenses.map(expense => (
-                                        <div key={expense.id} className="p-4 flex justify-between items-center group">
-                                            <div>
-                                                <p className="font-medium text-slate-800">{expense.name}</p>
-                                                <p className="text-[10px] text-slate-400 uppercase">Vence: Día {expense.paymentLimitDay || '-'}</p>
+                                    safeExpenses.map(expense => {
+                                        const today = new Date().getDate();
+                                        const day = expense.paymentLimitDay || 0;
+                                        // Urgency: if due day is today or within next 5 days
+                                        const diff = day - today;
+                                        const isUrgent = diff >= 0 && diff <= 5;
+
+                                        return (
+                                            <div key={expense.id} className="p-4 flex justify-between items-center group">
+                                                <div>
+                                                    <p className="font-medium text-slate-800">{expense.name}</p>
+                                                    <p className={`text-[10px] uppercase ${isUrgent ? 'text-rose-600 font-bold' : 'text-slate-400'}`}>
+                                                        Vence: Día {day || '-'} {isUrgent && '⚠️'}
+                                                    </p>
+                                                </div>
+                                                <div className="flex items-center gap-4">
+                                                    <span className="font-bold text-rose-500">-{formatCurrency(expense.amount, currency, currencySymbol)}</span>
+                                                    <button onClick={() => { setEditingFixedExpense(expense); setShowFixedExpenseForm(true); }} className="opacity-0 group-hover:opacity-100 p-2 text-slate-400 hover:text-blue-500 transition-all">✎</button>
+                                                </div>
                                             </div>
-                                            <div className="flex items-center gap-4">
-                                                <span className="font-bold text-rose-500">-{formatCurrency(expense.amount, currency, currencySymbol)}</span>
-                                                <button onClick={() => { setEditingFixedExpense(expense); setShowFixedExpenseForm(true); }} className="opacity-0 group-hover:opacity-100 p-2 text-slate-400 hover:text-blue-500 transition-all">✎</button>
-                                            </div>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                             </div>
                         </section>
                     </div>
