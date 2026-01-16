@@ -44,7 +44,12 @@ export default function ReportesPage() {
             yearsSet.add(y);
         }
 
-        const years = Array.from(yearsSet).sort((a, b) => b - a);
+        const currentYear = new Date().getFullYear();
+        const years = Array.from(yearsSet).sort((a, b) => {
+            if (a === currentYear) return -1;
+            if (b === currentYear) return 1;
+            return b - a;
+        });
 
         return years.map(year => {
             const yearTrans = businessTransactions.filter(t => parseLocalDate(t.date).getFullYear() === year && t.status === 'PAID');
@@ -211,7 +216,7 @@ export default function ReportesPage() {
                         <div className="flex justify-between items-center bg-slate-800 p-3 rounded-t-lg">
                             <h3 className="text-lg font-bold text-white uppercase tracking-wider">Flujo Mensual {selectedYear}</h3>
                         </div>
-                        <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
+                        <div className="overflow-x-auto">
                             <table className="w-full text-center">
                                 <thead className="bg-slate-100 text-slate-600 text-xs uppercase font-bold sticky top-0">
                                     <tr>
