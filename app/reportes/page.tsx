@@ -45,14 +45,11 @@ export default function ReportesPage() {
         }
 
         const currentYear = new Date().getFullYear();
-        const years = Array.from(yearsSet).sort((a, b) => {
-            if (a === currentYear) return -1;
-            if (b === currentYear) return 1;
-            return b - a;
-        });
+        const years = Array.from(yearsSet).sort((a, b) => b - a);
 
         return years.map(year => {
-            const yearTrans = businessTransactions.filter(t => parseLocalDate(t.date).getFullYear() === year && t.status === 'PAID');
+            // Remove PAID filter to show all activity in historical summary
+            const yearTrans = businessTransactions.filter(t => parseLocalDate(t.date).getFullYear() === year);
             const sales = yearTrans.filter(t => t.type === 'INCOME').reduce((sum, t) => sum + t.amount, 0);
             const expenses = yearTrans.filter(t => t.type === 'EXPENSE').reduce((sum, t) => sum + t.amount, 0);
             return { year, sales, expenses, savings: sales - expenses };
@@ -66,7 +63,7 @@ export default function ReportesPage() {
         return months.map(month => {
             const monthTrans = businessTransactions.filter(t => {
                 const d = parseLocalDate(t.date);
-                return d.getFullYear() === selectedYear && d.getMonth() === month && t.status === 'PAID';
+                return d.getFullYear() === selectedYear && d.getMonth() === month;
             });
 
             const sales = monthTrans.filter(t => t.type === 'INCOME').reduce((sum, t) => sum + t.amount, 0);
@@ -293,10 +290,10 @@ export default function ReportesPage() {
                                         .map((row) => (
                                             <tr key={row.year} className={`${row.year === selectedYear ? 'bg-emerald-50 ring-2 ring-emerald-500/20' : 'bg-slate-50/50 hover:bg-slate-50'} rounded-xl transition-all`}>
                                                 <td className="py-4 font-black text-slate-800 rounded-l-xl">{row.year}</td>
-                                                <td className="py-4 text-emerald-600 font-bold">{row.sales > 0 ? formatCurrency(row.sales, settings.currency, currencySymbol) : '-'}</td>
-                                                <td className="py-4 text-rose-500 font-bold">{row.expenses > 0 ? formatCurrency(row.expenses, settings.currency, currencySymbol) : '-'}</td>
+                                                <td className="py-4 text-emerald-600 font-bold">{formatCurrency(row.sales, settings.currency, currencySymbol)}</td>
+                                                <td className="py-4 text-rose-500 font-bold">{formatCurrency(row.expenses, settings.currency, currencySymbol)}</td>
                                                 <td className={`py-4 font-black rounded-r-xl ${row.savings >= 0 ? 'text-emerald-700' : 'text-rose-700'}`}>
-                                                    {row.savings !== 0 ? formatCurrency(row.savings, settings.currency, currencySymbol) : '-'}
+                                                    {formatCurrency(row.savings, settings.currency, currencySymbol)}
                                                 </td>
                                             </tr>
                                         ))}
@@ -324,10 +321,10 @@ export default function ReportesPage() {
                                     {monthlySummary.map((row) => (
                                         <tr key={row.monthName} className="bg-slate-50/50 hover:bg-slate-50 rounded-xl transition-all">
                                             <td className="py-4 font-black text-slate-800 capitalize text-left pl-6 rounded-l-xl">{row.monthName}</td>
-                                            <td className="py-4 text-slate-600 font-bold">{row.sales > 0 ? formatCurrency(row.sales, settings.currency, currencySymbol) : '-'}</td>
-                                            <td className="py-4 text-slate-600 font-bold">{row.expenses > 0 ? formatCurrency(row.expenses, settings.currency, currencySymbol) : '-'}</td>
+                                            <td className="py-4 text-slate-600 font-bold">{formatCurrency(row.sales, settings.currency, currencySymbol)}</td>
+                                            <td className="py-4 text-slate-600 font-bold">{formatCurrency(row.expenses, settings.currency, currencySymbol)}</td>
                                             <td className={`py-4 font-black rounded-r-xl ${row.savings >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
-                                                {row.savings !== 0 ? formatCurrency(row.savings, settings.currency, currencySymbol) : '-'}
+                                                {formatCurrency(row.savings, settings.currency, currencySymbol)}
                                             </td>
                                         </tr>
                                     ))}

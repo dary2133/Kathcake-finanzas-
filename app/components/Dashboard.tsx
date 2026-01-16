@@ -128,7 +128,7 @@ export default function Dashboard() {
                     <div className="divide-y divide-slate-100 max-h-[500px] overflow-auto">
                         {(function () {
                             const salesData = filteredTransactions
-                                .filter(t => t.type === 'INCOME' && t.status === 'PAID')
+                                .filter(t => t.type === 'INCOME')
                                 .reduce((acc, t) => {
                                     const key = t.description || 'Otros Ingresos';
                                     acc[key] = (acc[key] || 0) + t.amount;
@@ -167,7 +167,7 @@ export default function Dashboard() {
                     <div className="divide-y divide-slate-100 max-h-[500px] overflow-auto">
                         {(function () {
                             const expenseData = filteredTransactions
-                                .filter(t => t.type === 'EXPENSE' && t.status === 'PAID')
+                                .filter(t => t.type === 'EXPENSE')
                                 .reduce((acc, t) => {
                                     const key = t.description || 'Otros Gastos';
                                     acc[key] = (acc[key] || 0) + t.amount;
