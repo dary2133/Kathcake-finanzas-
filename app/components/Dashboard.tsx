@@ -9,7 +9,18 @@ export default function Dashboard() {
     const { settings } = useSettings();
     // Default to KATHCAKE as requested
     const [view, setView] = useState<'ALL' | 'PERSONAL' | 'KATHCAKE'>('KATHCAKE');
-    const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+    const [selectedYear, setSelectedYear] = useState<number>(() => {
+        if (typeof window !== 'undefined') {
+            const saved = localStorage.getItem('kathcake_selected_year');
+            return saved ? parseInt(saved) : new Date().getFullYear();
+        }
+        return new Date().getFullYear();
+    });
+
+    // Persist year choice
+    useEffect(() => {
+        localStorage.setItem('kathcake_selected_year', selectedYear.toString());
+    }, [selectedYear]);
 
     if (loading) {
         return <div className="p-8 text-center text-slate-500">Cargando datos...</div>;
@@ -29,8 +40,16 @@ export default function Dashboard() {
 
     // Get list of available years for the selector
     const currentYear = new Date().getFullYear();
-    const yearsSet = new Set([currentYear, currentYear + 1]);
+    const yearsSet = new Set<number>();
+
+    // Add years with data
     transactions.forEach(t => yearsSet.add(parseLocalDate(t.date).getFullYear()));
+
+    // Add a generous range around the current year
+    for (let y = 2020; y <= 2035; y++) {
+        yearsSet.add(y);
+    }
+
     const availableYears = Array.from(yearsSet).sort((a, b) => b - a);
 
     // Calculate Totals using filtered transactions

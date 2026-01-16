@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Layout from '../components/Layout';
 import { useTransactions, useSettings } from '../lib/hooks';
 import { formatCurrency, parseLocalDate } from '@/app/lib/utils';
@@ -10,7 +10,18 @@ export default function ReportesPage() {
     const { transactions, loading } = useTransactions();
     const { settings } = useSettings();
     const { currencySymbol } = settings;
-    const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+    const [selectedYear, setSelectedYear] = useState<number>(() => {
+        if (typeof window !== 'undefined') {
+            const saved = localStorage.getItem('kathcake_selected_year');
+            return saved ? parseInt(saved) : new Date().getFullYear();
+        }
+        return new Date().getFullYear();
+    });
+
+    // Sync with other pages and persist
+    useEffect(() => {
+        localStorage.setItem('kathcake_selected_year', selectedYear.toString());
+    }, [selectedYear]);
 
     // --- Business Logic Integration ---
     const businessTransactions = useMemo(() => {
@@ -23,9 +34,15 @@ export default function ReportesPage() {
 
     // 1. Annual Summary
     const annualSummary = useMemo(() => {
-        const currentYear = new Date().getFullYear();
-        const yearsSet = new Set([currentYear, currentYear + 1]);
+        const yearsSet = new Set<number>();
+
+        // Add years with data
         businessTransactions.forEach(t => yearsSet.add(parseLocalDate(t.date).getFullYear()));
+
+        // Add a generous range
+        for (let y = 2020; y <= 2035; y++) {
+            yearsSet.add(y);
+        }
 
         const years = Array.from(yearsSet).sort((a, b) => b - a);
 
