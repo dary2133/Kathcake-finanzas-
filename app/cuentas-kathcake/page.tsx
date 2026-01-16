@@ -67,7 +67,7 @@ export default function CuentasKathcakePage() {
                             <span className="text-6xl font-black text-emerald-900">$</span>
                         </div>
                         <div className="relative z-10">
-                            <h3 className="text-emerald-800 font-bold uppercase text-[9px] mb-1 tracking-widest">Caja/Banco Negocio</h3>
+                            <h3 className="text-emerald-800 font-bold uppercase text-[11px] mb-1 tracking-widest">Caja/Banco Negocio</h3>
                             <p className="text-2xl font-black text-emerald-600 tracking-tight">{formatCurrency(totalFunds, currency, currencySymbol)}</p>
                         </div>
 
@@ -96,7 +96,7 @@ export default function CuentasKathcakePage() {
                             <span className="text-6xl font-black text-rose-900">%</span>
                         </div>
                         <div className="relative z-10">
-                            <h3 className="text-rose-800 font-bold uppercase text-[9px] mb-1 tracking-widest">Deuda Negocio</h3>
+                            <h3 className="text-rose-800 font-bold uppercase text-[11px] mb-1 tracking-widest">Deuda Negocio</h3>
                             <p className="text-2xl font-black text-rose-600 tracking-tight">{formatCurrency(totalDebt, currency, currencySymbol)}</p>
                         </div>
 
@@ -125,7 +125,7 @@ export default function CuentasKathcakePage() {
                             <span className="text-6xl font-black text-slate-900">#</span>
                         </div>
                         <div className="relative z-10">
-                            <h3 className="text-slate-500 font-bold uppercase text-[9px] mb-1 tracking-widest">Ventas Fijas</h3>
+                            <h3 className="text-slate-500 font-bold uppercase text-[11px] mb-1 tracking-widest">Ventas Fijas</h3>
                             <p className="text-2xl font-black text-slate-800 tracking-tight">{formatCurrency(totalFixedIncome, currency, currencySymbol)}</p>
                         </div>
 
@@ -149,7 +149,7 @@ export default function CuentasKathcakePage() {
                         </div>
                     </div>
                     <div className={`p-6 rounded-2xl shadow-sm border ${netMonthlyFlow >= 0 ? 'bg-blue-50 border-blue-200' : 'bg-orange-50 border-orange-200'}`}>
-                        <h3 className={`font-bold uppercase text-[10px] mb-1 ${netMonthlyFlow >= 0 ? 'text-blue-800' : 'text-orange-800'}`}>Margen Fijo Mensual</h3>
+                        <h3 className={`font-bold uppercase text-[11px] mb-1 ${netMonthlyFlow >= 0 ? 'text-blue-800' : 'text-orange-800'}`}>Margen Fijo Mensual</h3>
                         <p className={`text-2xl font-black ${netMonthlyFlow >= 0 ? 'text-blue-600' : 'text-orange-600'}`}>{formatCurrency(netMonthlyFlow, currency, currencySymbol)}</p>
 
                         {/* ANÁLISIS DE CICLO MENSUAL ÚNICO */}
