@@ -89,14 +89,14 @@ export default function Dashboard() {
             {/* Summary Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <SummaryCard
-                    title="Ventas Kathcake"
+                    title={`Ventas Kathcake ${selectedYear}`}
                     amount={totalIncome}
                     type="income"
                     currency={settings.currency}
                     symbol={currencySymbol}
                 />
                 <SummaryCard
-                    title="Gastos Kathcake"
+                    title={`Gastos Kathcake ${selectedYear}`}
                     amount={totalExpense}
                     type="expense"
                     currency={settings.currency}
@@ -128,7 +128,7 @@ export default function Dashboard() {
                     <div className="divide-y divide-slate-100 max-h-[500px] overflow-auto">
                         {(function () {
                             const salesData = filteredTransactions
-                                .filter(t => t.type === 'INCOME')
+                                .filter(t => t.type === 'INCOME' && t.status === 'PAID')
                                 .reduce((acc, t) => {
                                     const key = t.description || 'Otros Ingresos';
                                     acc[key] = (acc[key] || 0) + t.amount;
@@ -167,7 +167,7 @@ export default function Dashboard() {
                     <div className="divide-y divide-slate-100 max-h-[500px] overflow-auto">
                         {(function () {
                             const expenseData = filteredTransactions
-                                .filter(t => t.type === 'EXPENSE')
+                                .filter(t => t.type === 'EXPENSE' && t.status === 'PAID')
                                 .reduce((acc, t) => {
                                     const key = t.description || 'Otros Gastos';
                                     acc[key] = (acc[key] || 0) + t.amount;
