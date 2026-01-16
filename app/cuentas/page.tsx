@@ -61,13 +61,110 @@ export default function CuentasPage() {
 
                 {/* RESUMEN SUPERIOR */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="bg-emerald-50 border border-emerald-100 p-6 rounded-2xl shadow-sm">
-                        <h3 className="text-emerald-800 font-bold uppercase text-[10px] mb-1">Total Activos</h3>
-                        <p className="text-2xl font-black text-emerald-600">{formatCurrency(totalFunds, currency, currencySymbol)}</p>
+                    {/* TOTAL ACTIVOS CARD */}
+                    <div className="bg-emerald-50 border border-emerald-100 p-5 rounded-2xl shadow-sm flex flex-col h-full bg-white relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-4 opacity-5">
+                            <span className="text-6xl font-black text-emerald-900">$</span>
+                        </div>
+                        <div className="relative z-10">
+                            <h3 className="text-emerald-800 font-bold uppercase text-[10px] tracking-widest mb-1">Total Activos</h3>
+                            <p className="text-3xl font-black text-emerald-500 tracking-tight">{formatCurrency(totalFunds, currency, currencySymbol)}</p>
+                        </div>
+
+                        {/* Breakdown of Current Assets */}
+                        <div className="mt-4 pt-3 border-t border-emerald-100/50 space-y-2">
+                            <p className="text-[10px] uppercase font-bold text-emerald-800/40 tracking-wider">Disponible en cuentas</p>
+                            <div className="space-y-1.5">
+                                {liquidFunds.length === 0 ? <p className="text-[10px] text-slate-400 italic">No hay cuentas registradas</p> :
+                                    liquidFunds.map(acc => (
+                                        <div key={acc.id} className="flex justify-between items-center text-xs">
+                                            <div className="flex items-center gap-1.5">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
+                                                <span className="text-slate-600 font-medium truncate max-w-[120px]">{acc.name}</span>
+                                            </div>
+                                            <span className="font-bold text-slate-700">{formatCurrency(acc.balance, currency, currencySymbol)}</span>
+                                        </div>
+                                    ))
+                                }
+                            </div>
+                        </div>
+
+                        {/* Upcoming Assets Section */}
+                        <div className="mt-4 pt-3 border-t border-emerald-100/50 space-y-2">
+                            <p className="text-[10px] uppercase font-bold text-emerald-800/40 tracking-wider">Próximos Ingresos</p>
+                            <div className="space-y-2">
+                                {(function () {
+                                    const currentDay = new Date().getDate();
+                                    const sortedIncomes = safeIncomes
+                                        .map(inco => {
+                                            const payDay = inco.paymentDay || 1;
+                                            let daysDiff = payDay - currentDay;
+                                            if (daysDiff <= 0) daysDiff += 30; // Approximation for next month
+                                            return { ...inco, daysDiff };
+                                        })
+                                        .sort((a, b) => a.daysDiff - b.daysDiff)
+                                        .slice(0, 3); // Show top 3 next incomes
+
+                                    if (sortedIncomes.length === 0) return <p className="text-[10px] text-slate-400 italic">No hay ingresos fijos</p>;
+
+                                    return sortedIncomes.map(inc => (
+                                        <div key={inc.id} className="bg-white/60 p-2 rounded-lg border border-emerald-100/50 flex justify-between items-center group/item hover:border-emerald-200 transition-colors">
+                                            <div>
+                                                <p className="text-[10px] font-bold text-slate-700 leading-tight">{inc.name}</p>
+                                                <p className="text-[9px] text-emerald-600 font-medium">
+                                                    Faltan {inc.daysDiff} días <span className="text-slate-300">|</span> Día {inc.paymentDay}
+                                                </p>
+                                            </div>
+                                            <span className="text-[10px] font-bold text-slate-600 bg-emerald-50 px-1.5 py-0.5 rounded text-emerald-700 border border-emerald-100">
+                                                +{formatCurrency(inc.amount, currency, currencySymbol)}
+                                            </span>
+                                        </div>
+                                    ));
+                                })()}
+                            </div>
+                        </div>
                     </div>
-                    <div className="bg-rose-50 border border-rose-100 p-6 rounded-2xl shadow-sm">
-                        <h3 className="text-rose-800 font-bold uppercase text-[10px] mb-1">Pasivos (Tarjetas)</h3>
-                        <p className="text-2xl font-black text-rose-600">{formatCurrency(totalDebt, currency, currencySymbol)}</p>
+
+                    {/* PASIVOS CARD */}
+                    <div className="bg-rose-50 border border-rose-100 p-5 rounded-2xl shadow-sm flex flex-col h-full bg-white relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-4 opacity-5">
+                            <span className="text-6xl font-black text-rose-900">%</span>
+                        </div>
+                        <div className="relative z-10">
+                            <h3 className="text-rose-800 font-bold uppercase text-[10px] tracking-widest mb-1">Pasivos (Tarjetas)</h3>
+                            <p className="text-3xl font-black text-rose-500 tracking-tight">{formatCurrency(totalDebt, currency, currencySymbol)}</p>
+                        </div>
+
+                        {/* Breakdown of Liabilities */}
+                        <div className="mt-4 pt-3 border-t border-rose-100/50 space-y-2">
+                            <p className="text-[10px] uppercase font-bold text-rose-800/40 tracking-wider">Desglose de deudas</p>
+                            <div className="space-y-1.5">
+                                {creditCards.length === 0 ? <p className="text-[10px] text-slate-400 italic">No hay deudas de tarjetas</p> :
+                                    creditCards.map(card => (
+                                        <div key={card.id} className="flex justify-between items-center text-xs group/card">
+                                            <div className="flex items-center gap-1.5">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-rose-400 group-hover/card:animate-pulse"></div>
+                                                <span className="text-slate-600 font-medium truncate max-w-[120px]">{card.name}</span>
+                                            </div>
+                                            <div className="text-right">
+                                                <span className="font-bold text-rose-600 block">{formatCurrency(card.balance, currency, currencySymbol)}</span>
+                                                {/* Optional: Show limit usage percentage if desired, keeping it simple for now to match style */}
+                                            </div>
+                                        </div>
+                                    ))
+                                }
+                            </div>
+                        </div>
+
+                        {/* Summary of Available Credit (Optional but useful for Pasivos card filler) */}
+                        <div className="mt-auto pt-4">
+                            <div className="bg-rose-100/30 p-2 rounded-lg border border-rose-100 flex items-center justify-between">
+                                <span className="text-[9px] font-bold text-rose-800 uppercase">Total Línea Crédito</span>
+                                <span className="text-[10px] font-black text-rose-700">
+                                    {formatCurrency(creditCards.reduce((sum, c) => sum + (Number(c.limit) || 0), 0), currency, currencySymbol)}
+                                </span>
+                            </div>
+                        </div>
                     </div>
                     <div className={`p-6 rounded-2xl shadow-sm border ${netMonthlyFlow >= 0 ? 'bg-blue-50 border-blue-200' : 'bg-orange-50 border-orange-200'}`}>
                         <h3 className={`font-bold uppercase text-[10px] mb-1 ${netMonthlyFlow >= 0 ? 'text-blue-800' : 'text-orange-800'}`}>Flujo Neto Mensual</h3>
