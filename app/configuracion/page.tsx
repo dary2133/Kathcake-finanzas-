@@ -13,6 +13,8 @@ export default function ConfiguracionPage() {
     const [symbol, setSymbol] = useState(settings.currencySymbol);
     const [incomeDescriptions, setIncomeDescriptions] = useState<string[]>(settings.incomeDescriptions || []);
     const [expenseDescriptions, setExpenseDescriptions] = useState<string[]>(settings.expenseDescriptions || []);
+    const [isEditingIncomes, setIsEditingIncomes] = useState(false);
+    const [isEditingExpenses, setIsEditingExpenses] = useState(false);
     const [showToast, setShowToast] = useState(false);
 
     useEffect(() => {
@@ -50,6 +52,9 @@ export default function ConfiguracionPage() {
 
         await updateSettings(newSettings);
         await refreshSettings();
+
+        setIsEditingIncomes(false);
+        setIsEditingExpenses(false);
 
         // Show success message
         setShowToast(true);
@@ -106,31 +111,51 @@ export default function ConfiguracionPage() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* INCOME LIST SECTION */}
-                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
-                            <h3 className="text-lg font-semibold text-emerald-700 border-b border-emerald-50 pb-2 flex items-center gap-2">
-                                <span>📈</span> Conceptos de Ingresos
-                            </h3>
-                            <p className="text-xs text-slate-500 italic">Escribe cada opción en una línea diferente.</p>
+                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4 relative group">
+                            <div className="flex justify-between items-center border-b border-emerald-50 pb-2">
+                                <h3 className="text-lg font-semibold text-emerald-700 flex items-center gap-2">
+                                    <span>📈</span> Conceptos de Ingresos
+                                </h3>
+                                <button
+                                    type="button"
+                                    onClick={() => setIsEditingIncomes(!isEditingIncomes)}
+                                    className={`text-xs px-2 py-1 rounded-lg font-bold transition-colors ${isEditingIncomes ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-500 hover:bg-emerald-100 hover:text-emerald-600'}`}
+                                >
+                                    {isEditingIncomes ? '✓ MODIFICANDO' : '✎ EDITAR'}
+                                </button>
+                            </div>
+                            <p className="text-[10px] text-slate-400 italic">Escribe cada opción en una línea diferente.</p>
                             <textarea
                                 value={incomeDescriptions.join('\n')}
                                 onChange={(e) => setIncomeDescriptions(e.target.value.split('\n').filter(line => line.trim() !== ''))}
                                 rows={12}
-                                className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono text-sm leading-relaxed"
+                                disabled={!isEditingIncomes}
+                                className={`w-full px-4 py-2 rounded-lg border transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono text-xs leading-relaxed ${isEditingIncomes ? 'bg-white border-emerald-200 shadow-inner' : 'bg-slate-50 border-transparent text-slate-500 opacity-80 cursor-not-allowed'}`}
                                 placeholder="Ej: VENTA DEL DIA"
                             />
                         </div>
 
                         {/* EXPENSE LIST SECTION */}
-                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
-                            <h3 className="text-lg font-semibold text-rose-700 border-b border-rose-50 pb-2 flex items-center gap-2">
-                                <span>📉</span> Conceptos de Gastos
-                            </h3>
-                            <p className="text-xs text-slate-500 italic">Escribe cada opción en una línea diferente.</p>
+                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4 relative group">
+                            <div className="flex justify-between items-center border-b border-rose-50 pb-2">
+                                <h3 className="text-lg font-semibold text-rose-700 flex items-center gap-2">
+                                    <span>📉</span> Conceptos de Gastos
+                                </h3>
+                                <button
+                                    type="button"
+                                    onClick={() => setIsEditingExpenses(!isEditingExpenses)}
+                                    className={`text-xs px-2 py-1 rounded-lg font-bold transition-colors ${isEditingExpenses ? 'bg-rose-600 text-white' : 'bg-slate-100 text-slate-500 hover:bg-rose-100 hover:text-rose-600'}`}
+                                >
+                                    {isEditingExpenses ? '✓ MODIFICANDO' : '✎ EDITAR'}
+                                </button>
+                            </div>
+                            <p className="text-[10px] text-slate-400 italic">Escribe cada opción en una línea diferente.</p>
                             <textarea
                                 value={expenseDescriptions.join('\n')}
                                 onChange={(e) => setExpenseDescriptions(e.target.value.split('\n').filter(line => line.trim() !== ''))}
                                 rows={12}
-                                className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-500 font-mono text-sm leading-relaxed"
+                                disabled={!isEditingExpenses}
+                                className={`w-full px-4 py-2 rounded-lg border transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-rose-500 font-mono text-xs leading-relaxed ${isEditingExpenses ? 'bg-white border-rose-200 shadow-inner' : 'bg-slate-50 border-transparent text-slate-500 opacity-80 cursor-not-allowed'}`}
                                 placeholder="Ej: HARINA"
                             />
                         </div>
