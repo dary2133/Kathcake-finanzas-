@@ -15,6 +15,8 @@ export default function ConfiguracionPage() {
     const [expenseDescriptions, setExpenseDescriptions] = useState<string[]>(settings.expenseDescriptions || []);
     const [isEditingIncomes, setIsEditingIncomes] = useState(false);
     const [isEditingExpenses, setIsEditingExpenses] = useState(false);
+    const [inputIncomeText, setInputIncomeText] = useState('');
+    const [inputExpenseText, setInputExpenseText] = useState('');
     const [showToast, setShowToast] = useState(false);
 
     useEffect(() => {
@@ -22,6 +24,8 @@ export default function ConfiguracionPage() {
         setSymbol(settings.currencySymbol);
         setIncomeDescriptions(settings.incomeDescriptions || []);
         setExpenseDescriptions(settings.expenseDescriptions || []);
+        setInputIncomeText((settings.incomeDescriptions || []).join('\n'));
+        setInputExpenseText((settings.expenseDescriptions || []).join('\n'));
     }, [settings]);
 
     const handleCurrencyChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -43,11 +47,14 @@ export default function ConfiguracionPage() {
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
 
+        const cleanedIncomes = inputIncomeText.split('\n').map(line => line.trim()).filter(line => line !== '');
+        const cleanedExpenses = inputExpenseText.split('\n').map(line => line.trim()).filter(line => line !== '');
+
         const newSettings: AppSettings = {
             currency,
             currencySymbol: symbol,
-            incomeDescriptions,
-            expenseDescriptions
+            incomeDescriptions: cleanedIncomes,
+            expenseDescriptions: cleanedExpenses
         };
 
         await updateSettings(newSettings);
@@ -126,8 +133,8 @@ export default function ConfiguracionPage() {
                             </div>
                             <p className="text-[10px] text-slate-400 italic">Escribe cada opción en una línea diferente.</p>
                             <textarea
-                                value={incomeDescriptions.join('\n')}
-                                onChange={(e) => setIncomeDescriptions(e.target.value.split('\n').filter(line => line.trim() !== ''))}
+                                value={inputIncomeText}
+                                onChange={(e) => setInputIncomeText(e.target.value)}
                                 rows={12}
                                 disabled={!isEditingIncomes}
                                 className={`w-full px-4 py-2 rounded-lg border transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono text-xs leading-relaxed ${isEditingIncomes ? 'bg-white border-emerald-200 shadow-inner' : 'bg-slate-50 border-transparent text-slate-500 opacity-80 cursor-not-allowed'}`}
@@ -151,8 +158,8 @@ export default function ConfiguracionPage() {
                             </div>
                             <p className="text-[10px] text-slate-400 italic">Escribe cada opción en una línea diferente.</p>
                             <textarea
-                                value={expenseDescriptions.join('\n')}
-                                onChange={(e) => setExpenseDescriptions(e.target.value.split('\n').filter(line => line.trim() !== ''))}
+                                value={inputExpenseText}
+                                onChange={(e) => setInputExpenseText(e.target.value)}
                                 rows={12}
                                 disabled={!isEditingExpenses}
                                 className={`w-full px-4 py-2 rounded-lg border transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-rose-500 font-mono text-xs leading-relaxed ${isEditingExpenses ? 'bg-white border-rose-200 shadow-inner' : 'bg-slate-50 border-transparent text-slate-500 opacity-80 cursor-not-allowed'}`}
