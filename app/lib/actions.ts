@@ -350,11 +350,40 @@ export async function getSettings(): Promise<AppSettings> {
             return defaults;
         }
 
+        const defaultIncomes = [
+            'BIZCOCHO DE VAINILLA 1/2 LB', 'BIZCOCHO DE VAINILLA 1 LB O MAS',
+            'BIZCOCHO DE CHOCOLATE 1/2 LB', 'BIZCOCHO DE CHOCOLATE 1 LB O MAS',
+            'VENTA DEL DIA', 'CHEESCAKE COMPLETO', 'FLAN COMPLETO',
+            'CHOCOFLAN COMPLETO', 'BESO DE ANGEL COMPLETO'
+        ];
+
+        const defaultExpenses = [
+            'MANTEQUILLA', 'HARINA', 'AZUCAR', 'LECHE ENTERA', 'LECHE CONDENSADA',
+            'CREMA DE LECHE', 'CREMA CHANTILLY', 'CACAO', 'CHOCOLATE COBERTURA',
+            'FRESAS', 'GASTOS PERSONALES', 'COCO Y LECHE DE COCO', 'HUEVOS',
+            'CHINOLA', 'COCTELES', 'NTD INGREDIENTES', 'AGUA', 'PAGO SAN', 'GAS',
+            'QUESO CREMA', 'PAPELERIA', 'REDONDELES Y FON', 'CAJAS PARA BIZCOCHOS',
+            'TRANSPORTE PEDIDOS', 'RON', 'CHISPAS DE CHOCOLATE', 'LECHE EVAPORADA',
+            'DULCE DE LECHE', 'MATERIALES PARA DECORACION', 'MATERIALES COMPLEMENTARIOS',
+            'CHUGAR SHOP', 'YOSHIDA', 'MANGAS DE RELLENOS', 'CUCHARAS',
+            'PLATOS DESECHABLES PARA PORCIONES', 'TRANSPORTE', 'SALARIO KATHERINE',
+            'GALLETA OREO O MARIA', 'SALARIO DIARIO KRISBEL', 'RENTA DIARIA',
+            'REFRESCOS Y AGUA', 'MATERIALES DE LIMPIEZA', 'ENERGIA ELECTRICA DIARIA',
+            'ACEITE', 'PAGO INTERNET'
+        ];
+
+        let incomeDescriptions = rows[0].income_descriptions ? JSON.parse(rows[0].income_descriptions) : [];
+        let expenseDescriptions = rows[0].expense_descriptions ? JSON.parse(rows[0].expense_descriptions) : [];
+
+        // If DB is empty, provide defaults so user can edit them in Config page
+        if (incomeDescriptions.length === 0) incomeDescriptions = defaultIncomes;
+        if (expenseDescriptions.length === 0) expenseDescriptions = defaultExpenses;
+
         return {
             currency: rows[0].currency,
             currencySymbol: rows[0].currency_symbol,
-            incomeDescriptions: rows[0].income_descriptions ? JSON.parse(rows[0].income_descriptions) : [],
-            expenseDescriptions: rows[0].expense_descriptions ? JSON.parse(rows[0].expense_descriptions) : []
+            incomeDescriptions,
+            expenseDescriptions
         };
     } catch (error) {
         console.error('Failed to fetch settings:', error);
