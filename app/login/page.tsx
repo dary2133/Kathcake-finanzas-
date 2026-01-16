@@ -43,8 +43,15 @@ export default function LoginPage() {
             <div className="max-w-md w-full bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden border border-white/50">
                 <div className="p-8 space-y-8">
                     <div className="text-center space-y-2">
-                        <div className="w-16 h-16 bg-gradient-to-tr from-pink-500 to-rose-500 rounded-2xl mx-auto flex items-center justify-center shadow-lg shadow-pink-500/30 transform rotate-3">
-                            <span className="text-3xl">🧁</span>
+                        <div className="w-24 h-24 mx-auto flex items-center justify-center transform hover:scale-105 transition-transform duration-300">
+                            <Image
+                                src="/Kath Cake logo Vector33.png"
+                                alt="Kathcake Logo"
+                                width={120}
+                                height={120}
+                                className="object-contain drop-shadow-xl"
+                                priority
+                            />
                         </div>
                         <h1 className="text-3xl font-black text-slate-800 tracking-tight">
                             Kathcake <span className="text-pink-600">Finanzas</span>
