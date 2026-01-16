@@ -1,5 +1,10 @@
+import { withAuth } from "next-auth/middleware";
 
-export { default } from "next-auth/middleware";
+export default withAuth({
+    pages: {
+        signIn: "/login",
+    },
+});
 
 export const config = {
     matcher: [
@@ -9,6 +14,6 @@ export const config = {
         "/ingresos/:path*",
         "/reportes/:path*",
         "/configuracion/:path*",
-        "/", // Protect home as well if dashboard is there
+        "/",
     ],
 };
