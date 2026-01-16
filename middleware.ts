@@ -4,6 +4,7 @@ export default withAuth({
     pages: {
         signIn: "/login",
     },
+    secret: process.env.NEXTAUTH_SECRET || "kathcake-secret-key-change-me-in-prod",
 });
 
 export const config = {
