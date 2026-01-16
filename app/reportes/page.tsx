@@ -3,7 +3,7 @@
 import { useState, useMemo } from 'react';
 import Layout from '../components/Layout';
 import { useTransactions, useSettings } from '../lib/hooks';
-import { formatCurrency } from '@/app/lib/utils';
+import { formatCurrency, parseLocalDate } from '@/app/lib/utils';
 
 export default function ReportesPage() {
     // We fetch all transactions but filter for Kathcake + Uncategorized as business data
@@ -23,11 +23,11 @@ export default function ReportesPage() {
 
     // 1. Annual Summary
     const annualSummary = useMemo(() => {
-        const years = Array.from(new Set(businessTransactions.map(t => new Date(t.date).getFullYear()))).sort((a, b) => b - a);
+        const years = Array.from(new Set(businessTransactions.map(t => parseLocalDate(t.date).getFullYear()))).sort((a, b) => b - a);
         if (!years.includes(selectedYear)) years.push(selectedYear);
 
         return years.map(year => {
-            const yearTrans = businessTransactions.filter(t => new Date(t.date).getFullYear() === year && t.status === 'PAID');
+            const yearTrans = businessTransactions.filter(t => parseLocalDate(t.date).getFullYear() === year && t.status === 'PAID');
             const sales = yearTrans.filter(t => t.type === 'INCOME').reduce((sum, t) => sum + t.amount, 0);
             const expenses = yearTrans.filter(t => t.type === 'EXPENSE').reduce((sum, t) => sum + t.amount, 0);
             return { year, sales, expenses, savings: sales - expenses };
@@ -40,7 +40,7 @@ export default function ReportesPage() {
 
         return months.map(month => {
             const monthTrans = businessTransactions.filter(t => {
-                const d = new Date(t.date);
+                const d = parseLocalDate(t.date);
                 return d.getFullYear() === selectedYear && d.getMonth() === month && t.status === 'PAID';
             });
 
@@ -58,7 +58,7 @@ export default function ReportesPage() {
 
     // 3. Category Breakdown (for Selected Year)
     const categoryBreakdown = useMemo(() => {
-        const yearTrans = businessTransactions.filter(t => new Date(t.date).getFullYear() === selectedYear && t.status === 'PAID');
+        const yearTrans = businessTransactions.filter(t => parseLocalDate(t.date).getFullYear() === selectedYear && t.status === 'PAID');
 
         const groupByCategory = (type: 'INCOME' | 'EXPENSE') => {
             const groups: Record<string, number> = {};
