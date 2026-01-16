@@ -132,25 +132,34 @@ export default function ReportesPage() {
         return (
             <div className="flex flex-col items-center">
                 <div
-                    className="w-48 h-48 rounded-full border-4 border-white shadow-lg"
+                    className="w-48 h-48 rounded-full border-8 border-white shadow-xl relative flex items-center justify-center transition-transform hover:scale-105 duration-500"
                     style={{ background: `conic-gradient(${gradientParts})` }}
-                ></div>
+                >
+                    {/* Donut hole for premium look */}
+                    <div className="absolute w-32 h-32 bg-white rounded-full shadow-inner flex flex-col items-center justify-center">
+                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">Total</span>
+                        <span className="text-sm font-black text-slate-800">{formatCurrency(total, settings.currency, currencySymbol)}</span>
+                    </div>
+                </div>
 
-                <div className="mt-6 w-full space-y-2">
+                <div className="mt-8 w-full space-y-3">
                     {topItems.map((item, index) => (
-                        <div key={item.name} className="flex justify-between text-xs">
-                            <div className="flex items-center gap-2">
-                                <span
-                                    className="w-3 h-3 rounded-full"
+                        <div key={item.name} className="flex justify-between items-center group/item cursor-default">
+                            <div className="flex items-center gap-3">
+                                <div
+                                    className="w-4 h-4 rounded-md shadow-sm transform transition-transform group-hover/item:scale-125"
                                     style={{
                                         backgroundColor: colorBase === 'emerald'
                                             ? ['#10B981', '#34D399', '#6EE7B7', '#059669', '#047857', '#065F46'][index % 6]
                                             : ['#F43F5E', '#FB7185', '#FDA4AF', '#E11D48', '#BE123C', '#9F1239'][index % 6]
                                     }}
                                 />
-                                <span className="text-slate-600 truncate max-w-[120px]">{item.name}</span>
+                                <span className="text-slate-600 text-xs font-semibold group-hover/item:text-slate-900 transition-colors truncate max-w-[140px] uppercase tracking-tighter">{item.name}</span>
                             </div>
-                            <span className="font-semibold text-slate-700">{Math.round((item.total / total) * 100)}% ({formatCurrency(item.total, settings.currency, currencySymbol)})</span>
+                            <div className="text-right">
+                                <p className="text-[11px] font-black text-slate-800 leading-none">{formatCurrency(item.total, settings.currency, currencySymbol)}</p>
+                                <p className="text-[9px] text-slate-400 font-bold">{Math.round((item.total / total) * 100)}%</p>
+                            </div>
                         </div>
                     ))}
                 </div>
@@ -163,8 +172,8 @@ export default function ReportesPage() {
             <div className="space-y-8">
                 <div className="flex justify-between items-center">
                     <div>
-                        <h2 className="text-3xl font-bold text-slate-800">Reportes Kathcake</h2>
-                        <p className="text-slate-500">Análisis detallado del rendimiento de tu negocio.</p>
+                        <h2 className="text-3xl font-bold text-slate-800 tracking-tight">Reportes Kathcake</h2>
+                        <p className="text-slate-500 text-sm">Análisis detallado del rendimiento de tu negocio.</p>
                     </div>
 
                     <select
@@ -178,61 +187,146 @@ export default function ReportesPage() {
                     </select>
                 </div>
 
+                {/* SECTION 1: DETAILED BREAKDOWN (VISUAL FIRST) */}
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+
+                    {/* Income Chart & List */}
+                    <div className="space-y-6">
+                        <div className="bg-emerald-600 p-4 rounded-2xl shadow-lg shadow-emerald-100 flex justify-between items-center text-white">
+                            <h3 className="text-lg font-black uppercase tracking-widest">Detalle Ventas {selectedYear}</h3>
+                        </div>
+
+                        <div className="bg-white p-8 rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-50 flex flex-col md:flex-row gap-10 items-center md:items-start">
+                            {/* Chart */}
+                            <div className="flex-shrink-0">
+                                <PieChartCSS data={categoryBreakdown.income} colorBase="emerald" />
+                            </div>
+
+                            {/* List */}
+                            <div className="flex-1 w-full overflow-hidden">
+                                <div className="rounded-xl overflow-hidden border border-slate-100">
+                                    <table className="w-full text-sm">
+                                        <thead className="bg-slate-900 text-white text-[10px] uppercase tracking-widest">
+                                            <tr>
+                                                <th className="py-3 px-4 text-left">Concepto</th>
+                                                <th className="py-3 px-4 text-right">Monto</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-slate-100">
+                                            {categoryBreakdown.income.map(item => (
+                                                <tr key={item.name} className="hover:bg-slate-50 transition-colors">
+                                                    <td className="py-3 px-4 text-slate-700 font-black text-xs uppercase truncate max-w-[150px]">{item.name}</td>
+                                                    <td className="py-3 px-4 text-right font-mono text-xs font-bold text-slate-900">{formatCurrency(item.total, settings.currency, currencySymbol)}</td>
+                                                </tr>
+                                            ))}
+                                            {categoryBreakdown.income.length === 0 && (
+                                                <tr><td colSpan={2} className="py-10 text-center text-slate-400 italic text-xs">Sin ventas para este año</td></tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Expenses Chart & List */}
+                    <div className="space-y-6">
+                        <div className="bg-rose-600 p-4 rounded-2xl shadow-lg shadow-rose-100 flex justify-between items-center text-white">
+                            <h3 className="text-lg font-black uppercase tracking-widest">Detalle Gastos {selectedYear}</h3>
+                        </div>
+
+                        <div className="bg-white p-8 rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-50 flex flex-col md:flex-row gap-10 items-center md:items-start">
+                            {/* Chart */}
+                            <div className="flex-shrink-0">
+                                <PieChartCSS data={categoryBreakdown.expense} colorBase="rose" />
+                            </div>
+
+                            {/* List */}
+                            <div className="flex-1 w-full overflow-hidden">
+                                <div className="rounded-xl overflow-hidden border border-slate-100">
+                                    <table className="w-full text-sm">
+                                        <thead className="bg-slate-900 text-white text-[10px] uppercase tracking-widest">
+                                            <tr>
+                                                <th className="py-3 px-4 text-left">Concepto</th>
+                                                <th className="py-3 px-4 text-right">Monto</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-slate-100">
+                                            {categoryBreakdown.expense.map(item => (
+                                                <tr key={item.name} className="hover:bg-slate-50 transition-colors">
+                                                    <td className="py-3 px-4 text-slate-700 font-black text-xs uppercase truncate max-w-[150px]">{item.name}</td>
+                                                    <td className="py-3 px-4 text-right font-mono text-xs font-bold text-slate-900">{formatCurrency(item.total, settings.currency, currencySymbol)}</td>
+                                                </tr>
+                                            ))}
+                                            {categoryBreakdown.expense.length === 0 && (
+                                                <tr><td colSpan={2} className="py-10 text-center text-slate-400 italic text-xs">Sin gastos para este año</td></tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* SECTION 2: HISTORICAL TABLES (NOW BELOW) */}
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
 
                     {/* 1. Annual Summary Table */}
-                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                        <h3 className="text-lg font-bold text-white bg-emerald-600 p-3 rounded-t-lg text-center uppercase tracking-wider">
-                            Resumen Anual del Negocio
-                        </h3>
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-center">
-                                <thead className="bg-slate-100 text-slate-600 text-xs uppercase font-bold">
+                    <div className="bg-white p-4 rounded-3xl shadow-lg border border-slate-100 flex flex-col h-[500px]">
+                        <div className="bg-slate-900 text-white p-4 rounded-2xl mb-4">
+                            <h3 className="text-sm font-black uppercase tracking-widest text-center">Resumen Anual Histórico</h3>
+                        </div>
+                        <div className="flex-1 overflow-auto pr-2 custom-scrollbar">
+                            <table className="w-full text-center border-separate border-spacing-y-2">
+                                <thead className="bg-slate-50 text-slate-400 text-[10px] uppercase font-black sticky top-0 z-10">
                                     <tr>
-                                        <th className="py-3 px-2">Año</th>
-                                        <th className="py-3 px-2">Ventas</th>
-                                        <th className="py-3 px-2">Gastos</th>
-                                        <th className="py-3 px-2">Utilidad Anual</th>
+                                        <th className="py-4 px-2">Año</th>
+                                        <th className="py-4 px-2">Ventas</th>
+                                        <th className="py-4 px-2">Gastos</th>
+                                        <th className="py-4 px-2">Utilidad</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-100 text-sm">
-                                    {annualSummary.map((row) => (
-                                        <tr key={row.year} className={row.year === selectedYear ? 'bg-emerald-50' : ''}>
-                                            <td className="py-3 font-bold text-slate-700">{row.year}</td>
-                                            <td className="py-3 text-emerald-600 font-bold">{formatCurrency(row.sales, settings.currency, currencySymbol)}</td>
-                                            <td className="py-3 text-rose-600 font-bold">{formatCurrency(row.expenses, settings.currency, currencySymbol)}</td>
-                                            <td className={`py-3 font-bold ${row.savings >= 0 ? 'text-emerald-700' : 'text-rose-700'}`}>
-                                                {formatCurrency(row.savings, settings.currency, currencySymbol)}
-                                            </td>
-                                        </tr>
-                                    ))}
+                                <tbody className="text-xs">
+                                    {annualSummary
+                                        .filter(row => row.sales > 0 || row.expenses > 0 || row.year === selectedYear || row.year === new Date().getFullYear())
+                                        .map((row) => (
+                                            <tr key={row.year} className={`${row.year === selectedYear ? 'bg-emerald-50 ring-2 ring-emerald-500/20' : 'bg-slate-50/50 hover:bg-slate-50'} rounded-xl transition-all`}>
+                                                <td className="py-4 font-black text-slate-800 rounded-l-xl">{row.year}</td>
+                                                <td className="py-4 text-emerald-600 font-bold">{row.sales > 0 ? formatCurrency(row.sales, settings.currency, currencySymbol) : '-'}</td>
+                                                <td className="py-4 text-rose-500 font-bold">{row.expenses > 0 ? formatCurrency(row.expenses, settings.currency, currencySymbol) : '-'}</td>
+                                                <td className={`py-4 font-black rounded-r-xl ${row.savings >= 0 ? 'text-emerald-700' : 'text-rose-700'}`}>
+                                                    {row.savings !== 0 ? formatCurrency(row.savings, settings.currency, currencySymbol) : '-'}
+                                                </td>
+                                            </tr>
+                                        ))}
                                 </tbody>
                             </table>
                         </div>
                     </div>
 
                     {/* 2. Monthly Summary Table */}
-                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                        <div className="flex justify-between items-center bg-slate-800 p-3 rounded-t-lg">
-                            <h3 className="text-lg font-bold text-white uppercase tracking-wider">Flujo Mensual {selectedYear}</h3>
+                    <div className="bg-white p-4 rounded-3xl shadow-lg border border-slate-100 flex flex-col h-[500px]">
+                        <div className="bg-slate-900 text-white p-4 rounded-2xl mb-4">
+                            <h3 className="text-sm font-black uppercase tracking-widest text-center">Flujo Mensual {selectedYear}</h3>
                         </div>
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-center">
-                                <thead className="bg-slate-100 text-slate-600 text-xs uppercase font-bold sticky top-0">
+                        <div className="flex-1 overflow-auto pr-2 custom-scrollbar">
+                            <table className="w-full text-center border-separate border-spacing-y-2">
+                                <thead className="bg-slate-50 text-slate-400 text-[10px] uppercase font-black sticky top-0 z-10">
                                     <tr>
-                                        <th className="py-3 px-2">Mes</th>
-                                        <th className="py-3 px-2">Ventas</th>
-                                        <th className="py-3 px-2">Gastos</th>
-                                        <th className="py-3 px-2">Utilidad</th>
+                                        <th className="py-4 px-2">Mes</th>
+                                        <th className="py-4 px-2">Ventas</th>
+                                        <th className="py-4 px-2">Gastos</th>
+                                        <th className="py-4 px-2">Utilidad</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-slate-100 text-sm">
+                                <tbody className="text-xs">
                                     {monthlySummary.map((row) => (
-                                        <tr key={row.monthName} className="hover:bg-slate-50">
-                                            <td className="py-3 font-bold text-slate-700 capitalize text-left pl-4">{row.monthName}</td>
-                                            <td className="py-3 text-slate-600">{row.sales > 0 ? formatCurrency(row.sales, settings.currency, currencySymbol) : '-'}</td>
-                                            <td className="py-3 text-slate-600">{row.expenses > 0 ? formatCurrency(row.expenses, settings.currency, currencySymbol) : '-'}</td>
-                                            <td className={`py-3 font-bold ${row.savings >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                                        <tr key={row.monthName} className="bg-slate-50/50 hover:bg-slate-50 rounded-xl transition-all">
+                                            <td className="py-4 font-black text-slate-800 capitalize text-left pl-6 rounded-l-xl">{row.monthName}</td>
+                                            <td className="py-4 text-slate-600 font-bold">{row.sales > 0 ? formatCurrency(row.sales, settings.currency, currencySymbol) : '-'}</td>
+                                            <td className="py-4 text-slate-600 font-bold">{row.expenses > 0 ? formatCurrency(row.expenses, settings.currency, currencySymbol) : '-'}</td>
+                                            <td className={`py-4 font-black rounded-r-xl ${row.savings >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
                                                 {row.savings !== 0 ? formatCurrency(row.savings, settings.currency, currencySymbol) : '-'}
                                             </td>
                                         </tr>
@@ -244,84 +338,6 @@ export default function ReportesPage() {
 
                 </div>
 
-                {/* 3. Charts and Breakdowns */}
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-
-                    {/* Income Chart & List */}
-                    <div className="space-y-6">
-                        <div className="bg-emerald-50 p-4 rounded-xl text-center border border-emerald-100">
-                            <h3 className="text-xl font-bold text-emerald-800 uppercase">Detalle de Ventas {selectedYear}</h3>
-                        </div>
-
-                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col md:flex-row gap-8 items-center md:items-start">
-                            {/* Chart */}
-                            <div className="flex-shrink-0">
-                                <PieChartCSS data={categoryBreakdown.income} colorBase="emerald" />
-                            </div>
-
-                            {/* List */}
-                            <div className="flex-1 w-full overflow-hidden">
-                                <table className="w-full text-sm">
-                                    <thead className="bg-slate-800 text-white text-xs uppercase">
-                                        <tr>
-                                            <th className="py-2 px-3 text-left">Concepto</th>
-                                            <th className="py-2 px-3 text-right">Monto</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-slate-100">
-                                        {categoryBreakdown.income.map(item => (
-                                            <tr key={item.name}>
-                                                <td className="py-2 px-3 text-slate-700 font-medium truncate max-w-[200px]">{item.name}</td>
-                                                <td className="py-2 px-3 text-right text-slate-600 whitespace-nowrap">{formatCurrency(item.total, settings.currency, currencySymbol)}</td>
-                                            </tr>
-                                        ))}
-                                        {categoryBreakdown.income.length === 0 && (
-                                            <tr><td colSpan={2} className="py-4 text-center text-slate-400">Sin ventas registradas</td></tr>
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Expenses Chart & List */}
-                    <div className="space-y-6">
-                        <div className="bg-rose-50 p-4 rounded-xl text-center border border-rose-100">
-                            <h3 className="text-xl font-bold text-rose-800 uppercase">Detalle de Gastos {selectedYear}</h3>
-                        </div>
-
-                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col md:flex-row gap-8 items-center md:items-start">
-                            {/* Chart */}
-                            <div className="flex-shrink-0">
-                                <PieChartCSS data={categoryBreakdown.expense} colorBase="rose" />
-                            </div>
-
-                            {/* List */}
-                            <div className="flex-1 w-full overflow-hidden">
-                                <table className="w-full text-sm">
-                                    <thead className="bg-slate-800 text-white text-xs uppercase">
-                                        <tr>
-                                            <th className="py-2 px-3 text-left">Concepto</th>
-                                            <th className="py-2 px-3 text-right">Monto</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-slate-100">
-                                        {categoryBreakdown.expense.map(item => (
-                                            <tr key={item.name}>
-                                                <td className="py-2 px-3 text-slate-700 font-medium truncate max-w-[200px]">{item.name}</td>
-                                                <td className="py-2 px-3 text-right text-slate-600 whitespace-nowrap">{formatCurrency(item.total, settings.currency, currencySymbol)}</td>
-                                            </tr>
-                                        ))}
-                                        {categoryBreakdown.expense.length === 0 && (
-                                            <tr><td colSpan={2} className="py-4 text-center text-slate-400">Sin gastos registrados</td></tr>
-                                        )}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
             </div>
         </Layout>
     );
