@@ -302,9 +302,17 @@ export default function CuentasPage() {
                             )}
                             <div className="p-2 grid grid-cols-1 gap-2">
                                 {liquidFunds.map(account => (
-                                    <div key={account.id} className="p-4 bg-slate-50/50 rounded-xl border border-slate-100 flex justify-between items-center">
-                                        <span className="font-medium text-slate-700">{account.name}</span>
-                                        <span className="font-bold text-slate-900">{formatCurrency(account.balance, currency, currencySymbol)}</span>
+                                    <div key={account.id} className="p-4 bg-slate-50/50 rounded-xl border border-slate-100 flex justify-between items-center group">
+                                        <div>
+                                            <span className="font-medium text-slate-700 block">{account.name}</span>
+                                            <span className="font-bold text-slate-900">{formatCurrency(account.balance, currency, currencySymbol)}</span>
+                                        </div>
+                                        <button
+                                            onClick={() => { setEditingAccount(account); setShowAccountForm(true); }}
+                                            className="opacity-0 group-hover:opacity-100 p-2 text-slate-400 hover:text-blue-600 transition-all font-bold text-xs bg-white border border-slate-200 rounded-lg shadow-sm"
+                                        >
+                                            EDITAR
+                                        </button>
                                     </div>
                                 ))}
                             </div>

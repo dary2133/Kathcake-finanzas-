@@ -265,12 +265,20 @@ export default function CuentasKathcakePage() {
                             <div className="p-4 grid grid-cols-1 gap-3">
                                 {liquidFunds.length === 0 ? <p className="text-center py-6 text-slate-400 text-sm italic">Sin cuentas registradas para el negocio.</p> :
                                     liquidFunds.map(account => (
-                                        <div key={account.id} className="p-5 bg-slate-50 rounded-2xl border border-slate-100 flex justify-between items-center hover:border-pink-200 transition-all shadow-sm">
+                                        <div key={account.id} className="p-5 bg-slate-50 rounded-2xl border border-slate-100 flex justify-between items-center hover:border-pink-200 transition-all shadow-sm group">
                                             <div>
                                                 <p className="text-xs text-slate-400 uppercase font-black tracking-widest">{account.type}</p>
                                                 <p className="font-bold text-slate-800 text-lg">{account.name}</p>
                                             </div>
-                                            <span className="text-xl font-black text-slate-900">{formatCurrency(account.balance, currency, currencySymbol)}</span>
+                                            <div className="flex items-center gap-4">
+                                                <span className="text-xl font-black text-slate-900">{formatCurrency(account.balance, currency, currencySymbol)}</span>
+                                                <button
+                                                    onClick={() => { setEditingAccount(account); setAccountFormSection('REGULAR'); setShowAccountForm(true); }}
+                                                    className="opacity-0 group-hover:opacity-100 px-3 py-1.5 text-pink-500 hover:text-pink-600 hover:bg-pink-50 transition-all font-bold text-[10px] uppercase border border-pink-200 rounded-lg"
+                                                >
+                                                    Editar
+                                                </button>
+                                            </div>
                                         </div>
                                     ))}
                             </div>
