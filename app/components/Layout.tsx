@@ -3,6 +3,8 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { signOut } from 'next-auth/react';
+import SessionTimeout from './SessionTimeout';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
     const pathname = usePathname();
@@ -19,6 +21,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
     return (
         <div className='min-h-screen bg-slate-50 flex font-sans text-slate-900'>
+            <SessionTimeout />
             {/* Sidebar */}
             <aside className='w-64 bg-slate-900 text-white flex flex-col fixed h-full'>
                 <div className='p-6 border-b border-slate-700 flex flex-col items-center text-center'>
@@ -37,7 +40,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     <p className='text-xs text-slate-400 mt-1'>Control Financiero</p>
                 </div>
 
-                <nav className='flex-1 p-4 space-y-2'>
+                <nav className='flex-1 p-4 space-y-2 overflow-y-auto'>
                     {navItems.map((item) => {
                         const isActive = pathname === item.href;
                         return (
@@ -55,9 +58,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                     })}
                 </nav>
 
-                <div className='p-4 border-t border-slate-800'>
-                    <div className='text-xs text-center text-slate-500'>
-                        v1.0 Local Only
+                <div className='p-4 border-t border-slate-800 space-y-4'>
+                    <button
+                        onClick={() => signOut({ callbackUrl: '/login' })}
+                        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-rose-600/10 text-rose-400 hover:bg-rose-600 hover:text-white rounded-xl transition-all duration-200 font-bold border border-rose-600/20"
+                    >
+                        <span>🚪</span> Cerrar Sesión
+                    </button>
+                    <div className='text-[10px] text-center text-slate-500 uppercase tracking-widest font-bold'>
+                        Kathcake Finance v1.2
                     </div>
                 </div>
             </aside>
