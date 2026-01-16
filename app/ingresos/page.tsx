@@ -35,20 +35,6 @@ export default function IngresosPage() {
                         <p className="text-slate-500">Registra tus ventas y entradas de dinero.</p>
                     </div>
                     <div className="flex items-center gap-4 w-full md:w-auto">
-                        <div className="flex bg-slate-100 p-1 rounded-xl w-full md:w-auto">
-                            <button
-                                onClick={() => setTransactionCategory('PERSONAL')}
-                                className={`flex-1 md:flex-none px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${transactionCategory === 'PERSONAL' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-                            >
-                                Personal
-                            </button>
-                            <button
-                                onClick={() => setTransactionCategory('KATHCAKE')}
-                                className={`flex-1 md:flex-none px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${transactionCategory === 'KATHCAKE' ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-                            >
-                                Kathcake
-                            </button>
-                        </div>
                         <button
                             onClick={() => {
                                 setIsManageMode(!isManageMode);
