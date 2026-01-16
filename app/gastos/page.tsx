@@ -5,7 +5,8 @@ import Layout from '../components/Layout';
 import TransactionForm from '../components/TransactionForm';
 import TransactionList from '../components/TransactionList';
 import { useTransactions, useSettings } from '../lib/hooks';
-import { formatCurrency } from '@/app/lib/utils';
+import { formatCurrency, parseLocalDate } from '@/app/lib/utils';
+import { useEffect } from 'react';
 import { Transaction } from '../lib/types';
 
 export default function GastosPage() {
@@ -16,8 +17,31 @@ export default function GastosPage() {
     const [isManageMode, setIsManageMode] = useState(false);
     // Updated default to KATHCAKE as per USER request
     const [transactionCategory, setTransactionCategory] = useState<'PERSONAL' | 'KATHCAKE'>('KATHCAKE');
+    const [selectedYear, setSelectedYear] = useState<number>(() => {
+        if (typeof window !== 'undefined') {
+            const saved = localStorage.getItem('kathcake_selected_year');
+            return saved ? parseInt(saved) : new Date().getFullYear();
+        }
+        return new Date().getFullYear();
+    });
 
-    const expenses = transactions.filter(t => t.type === 'EXPENSE' && (t.transactionCategory === transactionCategory || (!t.transactionCategory && transactionCategory === 'KATHCAKE')));
+    // Sync year choice
+    useEffect(() => {
+        localStorage.setItem('kathcake_selected_year', selectedYear.toString());
+    }, [selectedYear]);
+
+    const expenses = transactions.filter(t => {
+        const isYearMatch = parseLocalDate(t.date).getFullYear() === selectedYear;
+        const isCategoryMatch = t.transactionCategory === transactionCategory || (!t.transactionCategory && transactionCategory === 'KATHCAKE');
+        return t.type === 'EXPENSE' && isYearMatch && isCategoryMatch;
+    });
+
+    // Year range for selector
+    const currentYear = new Date().getFullYear();
+    const yearsSet = new Set<number>();
+    transactions.forEach(t => yearsSet.add(parseLocalDate(t.date).getFullYear()));
+    for (let y = 2020; y <= 2035; y++) yearsSet.add(y);
+    const availableYears = Array.from(yearsSet).sort((a, b) => b - a);
 
     const handleSuccess = () => {
         refreshTransactions();
@@ -35,7 +59,6 @@ export default function GastosPage() {
                         <p className="text-slate-500">Registra y controla tus salidas de dinero.</p>
                     </div>
                     <div className="flex items-center gap-4 w-full md:w-auto">
-
                         <button
                             onClick={() => {
                                 setIsManageMode(!isManageMode);
@@ -48,13 +71,23 @@ export default function GastosPage() {
                         >
                             {isManageMode ? '✅ Finalizar' : '✏️ Editar'}
                         </button>
+
+                        <select
+                            value={selectedYear}
+                            onChange={(e) => setSelectedYear(Number(e.target.value))}
+                            className="bg-white border border-slate-200 text-slate-700 rounded-xl px-4 py-2 text-sm font-semibold shadow-sm focus:ring-2 focus:ring-purple-500 outline-none"
+                        >
+                            {availableYears.map(y => (
+                                <option key={y} value={y}>{y}</option>
+                            ))}
+                        </select>
                     </div>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
                     <div className="lg:col-span-1 lg:sticky lg:top-24 space-y-4">
                         <div className={`${transactionCategory === 'KATHCAKE' ? 'bg-rose-600' : 'bg-blue-600'} text-white p-4 rounded-2xl shadow-sm text-center`}>
-                            <p className="opacity-80 text-xs font-medium uppercase tracking-wider mb-1">Total Gastos {transactionCategory.toLowerCase()}</p>
+                            <p className="opacity-80 text-xs font-medium uppercase tracking-wider mb-1">Total Gastos {transactionCategory.toLowerCase()} {selectedYear}</p>
                             <p className="text-2xl font-bold">
                                 {formatCurrency(expenses.reduce((sum, t) => sum + t.amount, 0), settings.currency, currencySymbol)}
                             </p>
