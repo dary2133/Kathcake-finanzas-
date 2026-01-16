@@ -73,6 +73,7 @@ export default function FixedIncomeForm({ initialData, onSuccess, onCancel, onDe
         <form onSubmit={handleSubmit} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4 max-w-md mx-auto">
             <h3 className="text-lg font-semibold text-slate-800">{initialData ? 'Editar Ingreso Fijo' : 'Nuevo Ingreso Fijo'}</h3>
 
+            {/* Categoría oculta si defaultCategory existe */}
             {!defaultCategory && (
                 <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">Categoría</label>

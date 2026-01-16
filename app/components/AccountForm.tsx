@@ -61,6 +61,7 @@ export default function AccountForm({ initialData, onSuccess, onCancel, onDelete
         <form onSubmit={handleSubmit} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
             <h3 className="text-lg font-semibold text-slate-800">{initialData ? 'Editar Cuenta' : 'Agregar Nueva Cuenta'}</h3>
 
+            {/* Categoría oculta si defaultCategory existe */}
             {!defaultCategory && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>

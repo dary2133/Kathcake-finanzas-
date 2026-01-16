@@ -83,6 +83,7 @@ export default function FixedExpenseForm({ initialData, onSuccess, onCancel, onD
         <form onSubmit={handleSubmit} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
             <h3 className="text-lg font-semibold text-slate-800">{initialData ? 'Editar Gasto Fijo' : 'Agregar Gasto Fijo'}</h3>
 
+            {/* Categoría oculta si defaultCategory existe, para simplificar UI */}
             {!defaultCategory && (
                 <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">Categoría</label>
