@@ -303,28 +303,32 @@ export default function CuentasPage() {
                     <div className="space-y-8">
                         {/* SECCIÓN CUENTAS */}
                         <section className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-                            <div className="p-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
-                                <h4 className="font-bold text-slate-700">Disponibilidad (Cuentas)</h4>
-                                <button onClick={() => setShowAccountForm(true)} className="text-xs text-blue-600 font-bold">+ NUEVA</button>
+                            <div className="p-4 border-b border-slate-100 bg-slate-900 text-white flex justify-between items-center">
+                                <h4 className="font-bold">Disponibilidad (Cuentas)</h4>
+                                <button onClick={() => { setAccountFormSection('REGULAR'); setShowAccountForm(true); }} className="text-[10px] bg-blue-600 px-3 py-1.5 rounded font-bold uppercase tracking-wider shadow-sm hover:bg-blue-700 transition-colors">+ NUEVA CUENTA</button>
                             </div>
-                            {showAccountForm && (
+                            {showAccountForm && (!accountFormSection || accountFormSection === 'REGULAR') && (
                                 <div className="p-4 border-b"><AccountForm defaultType="BANK" defaultCategory="PERSONAL" initialData={editingAccount} onSuccess={handleAccountSuccess} onCancel={() => setShowAccountForm(false)} /></div>
                             )}
-                            <div className="p-2 grid grid-cols-1 gap-2">
-                                {liquidFunds.map(account => (
-                                    <div key={account.id} className="p-4 bg-slate-50/50 rounded-xl border border-slate-100 flex justify-between items-center group">
-                                        <div>
-                                            <span className="font-medium text-slate-700 block">{account.name}</span>
-                                            <span className="font-bold text-slate-900">{formatCurrency(account.balance, currency, currencySymbol)}</span>
+                            <div className="p-4 grid grid-cols-1 gap-3">
+                                {liquidFunds.length === 0 ? <p className="text-center py-6 text-slate-400 text-sm italic">Sin cuentas registradas.</p> :
+                                    liquidFunds.map(account => (
+                                        <div key={account.id} className="p-5 bg-slate-50 rounded-2xl border border-slate-100 flex justify-between items-center hover:border-blue-200 transition-all shadow-sm group">
+                                            <div>
+                                                <p className="text-xs text-slate-400 uppercase font-black tracking-widest">{account.type === 'BANK' ? 'Banco/Digi' : account.type === 'CASH' ? 'Efectivo' : account.type}</p>
+                                                <p className="font-bold text-slate-800 text-lg">{account.name}</p>
+                                            </div>
+                                            <div className="flex items-center gap-4">
+                                                <span className="text-xl font-black text-slate-900">{formatCurrency(account.balance, currency, currencySymbol)}</span>
+                                                <button
+                                                    onClick={() => { setEditingAccount(account); setAccountFormSection('REGULAR'); setShowAccountForm(true); }}
+                                                    className="opacity-0 group-hover:opacity-100 px-3 py-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50 transition-all font-bold text-[10px] uppercase border border-blue-200 rounded-lg shadow-sm"
+                                                >
+                                                    Editar
+                                                </button>
+                                            </div>
                                         </div>
-                                        <button
-                                            onClick={() => { setEditingAccount(account); setShowAccountForm(true); }}
-                                            className="opacity-0 group-hover:opacity-100 p-2 text-slate-400 hover:text-blue-600 transition-all font-bold text-xs bg-white border border-slate-200 rounded-lg shadow-sm"
-                                        >
-                                            EDITAR
-                                        </button>
-                                    </div>
-                                ))}
+                                    ))}
                             </div>
                         </section>
 
