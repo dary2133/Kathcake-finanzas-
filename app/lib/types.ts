@@ -38,6 +38,8 @@ export type AccountType = Account['type'];
 export interface AppSettings {
     currency: string;
     currencySymbol: string;
+    incomeDescriptions?: string[];
+    expenseDescriptions?: string[];
 }
 
 export interface FixedExpense {

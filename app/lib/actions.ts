@@ -312,15 +312,53 @@ export async function deleteFixedIncome(id: string) {
 // SETTINGS
 export async function getSettings(): Promise<AppSettings> {
     try {
+        // Ensure table and columns exist
+        await sql`CREATE TABLE IF NOT EXISTS settings (id INTEGER PRIMARY KEY, currency TEXT, currency_symbol TEXT)`;
+        await sql`ALTER TABLE settings ADD COLUMN IF NOT EXISTS income_descriptions TEXT`;
+        await sql`ALTER TABLE settings ADD COLUMN IF NOT EXISTS expense_descriptions TEXT`;
+
         const { rows } = await sql<any>`SELECT * FROM settings WHERE id = 1`;
-        if (rows.length === 0) return { currency: 'DOP', currencySymbol: 'RD$' };
+        if (rows.length === 0) {
+            const defaults = {
+                currency: 'DOP',
+                currencySymbol: 'RD$',
+                incomeDescriptions: [
+                    'BIZCOCHO DE VAINILLA 1/2 LB', 'BIZCOCHO DE VAINILLA 1 LB O MAS',
+                    'BIZCOCHO DE CHOCOLATE 1/2 LB', 'BIZCOCHO DE CHOCOLATE 1 LB O MAS',
+                    'VENTA DEL DIA', 'CHEESCAKE COMPLETO', 'FLAN COMPLETO',
+                    'CHOCOFLAN COMPLETO', 'BESO DE ANGEL COMPLETO'
+                ],
+                expenseDescriptions: [
+                    'MANTEQUILLA', 'HARINA', 'AZUCAR', 'LECHE ENTERA', 'LECHE CONDENSADA',
+                    'CREMA DE LECHE', 'CREMA CHANTILLY', 'CACAO', 'CHOCOLATE COBERTURA',
+                    'FRESAS', 'GASTOS PERSONALES', 'COCO Y LECHE DE COCO', 'HUEVOS',
+                    'CHINOLA', 'COCTELES', 'NTD INGREDIENTES', 'AGUA', 'PAGO SAN', 'GAS',
+                    'QUESO CREMA', 'PAPELERIA', 'REDONDELES Y FON', 'CAJAS PARA BIZCOCHOS',
+                    'TRANSPORTE PEDIDOS', 'RON', 'CHISPAS DE CHOCOLATE', 'LECHE EVAPORADA',
+                    'DULCE DE LECHE', 'MATERIALES PARA DECORACION', 'MATERIALES COMPLEMENTARIOS',
+                    'CHUGAR SHOP', 'YOSHIDA', 'MANGAS DE RELLENOS', 'CUCHARAS',
+                    'PLATOS DESECHABLES PARA PORCIONES', 'TRANSPORTE', 'SALARIO KATHERINE',
+                    'GALLETA OREO O MARIA', 'SALARIO DIARIO KRISBEL', 'RENTA DIARIA',
+                    'REFRESCOS Y AGUA', 'MATERIALES DE LIMPIEZA', 'ENERGIA ELECTRICA DIARIA',
+                    'ACEITE', 'PAGO INTERNET'
+                ]
+            };
+            await sql`
+                INSERT INTO settings (id, currency, currency_symbol, income_descriptions, expense_descriptions)
+                VALUES (1, ${defaults.currency}, ${defaults.currencySymbol}, ${JSON.stringify(defaults.incomeDescriptions)}, ${JSON.stringify(defaults.expenseDescriptions)})
+            `;
+            return defaults;
+        }
+
         return {
             currency: rows[0].currency,
-            currencySymbol: rows[0].currency_symbol
+            currencySymbol: rows[0].currency_symbol,
+            incomeDescriptions: rows[0].income_descriptions ? JSON.parse(rows[0].income_descriptions) : [],
+            expenseDescriptions: rows[0].expense_descriptions ? JSON.parse(rows[0].expense_descriptions) : []
         };
     } catch (error) {
         console.error('Failed to fetch settings:', error);
-        return { currency: 'DOP', currencySymbol: 'RD$' };
+        return { currency: 'DOP', currencySymbol: 'RD$', incomeDescriptions: [], expenseDescriptions: [] };
     }
 }
 
@@ -329,7 +367,9 @@ export async function updateSettings(settings: AppSettings) {
         await sql`
             UPDATE settings 
             SET currency = ${settings.currency}, 
-                currency_symbol = ${settings.currencySymbol}
+                currency_symbol = ${settings.currencySymbol},
+                income_descriptions = ${JSON.stringify(settings.incomeDescriptions || [])},
+                expense_descriptions = ${JSON.stringify(settings.expenseDescriptions || [])}
             WHERE id = 1
         `;
         revalidatePath('/configuracion');

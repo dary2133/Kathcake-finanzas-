@@ -92,27 +92,31 @@ export default function TransactionForm({ type, initialData, onSuccess, onCancel
         ? ['Insumos', 'Gastos Fijos', 'Servicios', 'Mantenimiento', 'Sueldos', 'Otros']
         : ['Ventas', 'Inversión', 'Préstamo', 'Otros'];
 
+    const defaultIncomes = [
+        'BIZCOCHO DE VAINILLA 1/2 LB', 'BIZCOCHO DE VAINILLA 1 LB O MAS',
+        'BIZCOCHO DE CHOCOLATE 1/2 LB', 'BIZCOCHO DE CHOCOLATE 1 LB O MAS',
+        'VENTA DEL DIA', 'CHEESCAKE COMPLETO', 'FLAN COMPLETO',
+        'CHOCOFLAN COMPLETO', 'BESO DE ANGEL COMPLETO'
+    ];
+
+    const defaultExpenses = [
+        'MANTEQUILLA', 'HARINA', 'AZUCAR', 'LECHE ENTERA', 'LECHE CONDENSADA',
+        'CREMA DE LECHE', 'CREMA CHANTILLY', 'CACAO', 'CHOCOLATE COBERTURA',
+        'FRESAS', 'GASTOS PERSONALES', 'COCO Y LECHE DE COCO', 'HUEVOS',
+        'CHINOLA', 'COCTELES', 'NTD INGREDIENTES', 'AGUA', 'PAGO SAN', 'GAS',
+        'QUESO CREMA', 'PAPELERIA', 'REDONDELES Y FON', 'CAJAS PARA BIZCOCHOS',
+        'TRANSPORTE PEDIDOS', 'RON', 'CHISPAS DE CHOCOLATE', 'LECHE EVAPORADA',
+        'DULCE DE LECHE', 'MATERIALES PARA DECORACION', 'MATERIALES COMPLEMENTARIOS',
+        'CHUGAR SHOP', 'YOSHIDA', 'MANGAS DE RELLENOS', 'CUCHARAS',
+        'PLATOS DESECHABLES PARA PORCIONES', 'TRANSPORTE', 'SALARIO KATHERINE',
+        'GALLETA OREO O MARIA', 'SALARIO DIARIO KRISBEL', 'RENTA DIARIA',
+        'REFRESCOS Y AGUA', 'MATERIALES DE LIMPIEZA', 'ENERGIA ELECTRICA DIARIA',
+        'ACEITE', 'PAGO INTERNET'
+    ];
+
     const commonDescriptions = type === 'INCOME'
-        ? [
-            'BIZCOCHO DE VAINILLA 1/2 LB', 'BIZCOCHO DE VAINILLA 1 LB O MAS',
-            'BIZCOCHO DE CHOCOLATE 1/2 LB', 'BIZCOCHO DE CHOCOLATE 1 LB O MAS',
-            'VENTA DEL DIA', 'CHEESCAKE COMPLETO', 'FLAN COMPLETO',
-            'CHOCOFLAN COMPLETO', 'BESO DE ANGEL COMPLETO'
-        ]
-        : [
-            'MANTEQUILLA', 'HARINA', 'AZUCAR', 'LECHE ENTERA', 'LECHE CONDENSADA',
-            'CREMA DE LECHE', 'CREMA CHANTILLY', 'CACAO', 'CHOCOLATE COBERTURA',
-            'FRESAS', 'GASTOS PERSONALES', 'COCO Y LECHE DE COCO', 'HUEVOS',
-            'CHINOLA', 'COCTELES', 'MTD INGREDIENTES', 'AGUA', 'PAGO SAN', 'GAS',
-            'QUESO CREMA', 'PAPELERIA', 'REDONDELES Y FON', 'CAJAS PARA BIZCOCHOS',
-            'TRANSPORTE PEDIDOS', 'RON', 'CHISPAS DE CHOCOLATE', 'LECHE EVAPORADA',
-            'DULCE DE LECHE', 'MATERIALES PARA DECORACION', 'MATERIALES COMPLEMENTARIOS',
-            'CHUGAR SHOP', 'YOSHIDA', 'MANGAS DE RELLENOS', 'CUCHARAS',
-            'PLATOS DESECHABLES PARA PORCIONES', 'TRANSPORTE', 'SALARIO KATHERINE',
-            'GALLETA OREO O MARIA', 'SALARIO DIARIO KRISBEL', 'RENTA DIARIA',
-            'REFRESCOS Y AGUA', 'MATERIALES DE LIMPIEZA', 'ENERGIA ELECTRICA DIARIA',
-            'ACEITE', 'PAGO INTERNET'
-        ];
+        ? (settings.incomeDescriptions && settings.incomeDescriptions.length > 0 ? settings.incomeDescriptions : defaultIncomes)
+        : (settings.expenseDescriptions && settings.expenseDescriptions.length > 0 ? settings.expenseDescriptions : defaultExpenses);
 
     return (
         <form onSubmit={handleSubmit} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">

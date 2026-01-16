@@ -11,11 +11,15 @@ export default function ConfiguracionPage() {
     const { settings, refreshSettings } = useSettings();
     const [currency, setCurrency] = useState(settings.currency);
     const [symbol, setSymbol] = useState(settings.currencySymbol);
+    const [incomeDescriptions, setIncomeDescriptions] = useState<string[]>(settings.incomeDescriptions || []);
+    const [expenseDescriptions, setExpenseDescriptions] = useState<string[]>(settings.expenseDescriptions || []);
     const [showToast, setShowToast] = useState(false);
 
     useEffect(() => {
         setCurrency(settings.currency);
         setSymbol(settings.currencySymbol);
+        setIncomeDescriptions(settings.incomeDescriptions || []);
+        setExpenseDescriptions(settings.expenseDescriptions || []);
     }, [settings]);
 
     const handleCurrencyChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -39,7 +43,9 @@ export default function ConfiguracionPage() {
 
         const newSettings: AppSettings = {
             currency,
-            currencySymbol: symbol
+            currencySymbol: symbol,
+            incomeDescriptions,
+            expenseDescriptions
         };
 
         await updateSettings(newSettings);
@@ -52,15 +58,18 @@ export default function ConfiguracionPage() {
 
     return (
         <Layout>
-            <div className="max-w-2xl mx-auto space-y-6">
+            <div className="max-w-3xl mx-auto space-y-6 pb-20">
                 <div>
                     <h2 className="text-3xl font-bold text-slate-800">Configuración</h2>
-                    <p className="text-slate-500">Personaliza la moneda y otros ajustes de tu aplicación.</p>
+                    <p className="text-slate-500">Personaliza la moneda y listas desplegables de tu aplicación.</p>
                 </div>
 
-                <form onSubmit={handleSave} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-6">
-                    <div className="space-y-4">
-                        <h3 className="text-lg font-semibold text-slate-800 border-b border-slate-100 pb-2">Moneda Principal</h3>
+                <form onSubmit={handleSave} className="space-y-6">
+                    {/* MONEDA SECTION */}
+                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
+                        <h3 className="text-lg font-semibold text-slate-800 border-b border-slate-100 pb-2 flex items-center gap-2">
+                            <span>💰</span> Moneda Principal
+                        </h3>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
@@ -93,16 +102,44 @@ export default function ConfiguracionPage() {
                                 />
                             </div>
                         </div>
-
-                        <p className="text-sm text-slate-400">
-                            Este símbolo se mostrará en todos los montos del sistema (Dashboard, Ingresos, Gastos).
-                        </p>
                     </div>
 
-                    <div className="pt-4 flex justify-end">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {/* INCOME LIST SECTION */}
+                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
+                            <h3 className="text-lg font-semibold text-emerald-700 border-b border-emerald-50 pb-2 flex items-center gap-2">
+                                <span>📈</span> Conceptos de Ingresos
+                            </h3>
+                            <p className="text-xs text-slate-500 italic">Escribe cada opción en una línea diferente.</p>
+                            <textarea
+                                value={incomeDescriptions.join('\n')}
+                                onChange={(e) => setIncomeDescriptions(e.target.value.split('\n').filter(line => line.trim() !== ''))}
+                                rows={12}
+                                className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-mono text-sm leading-relaxed"
+                                placeholder="Ej: VENTA DEL DIA"
+                            />
+                        </div>
+
+                        {/* EXPENSE LIST SECTION */}
+                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 space-y-4">
+                            <h3 className="text-lg font-semibold text-rose-700 border-b border-rose-50 pb-2 flex items-center gap-2">
+                                <span>📉</span> Conceptos de Gastos
+                            </h3>
+                            <p className="text-xs text-slate-500 italic">Escribe cada opción en una línea diferente.</p>
+                            <textarea
+                                value={expenseDescriptions.join('\n')}
+                                onChange={(e) => setExpenseDescriptions(e.target.value.split('\n').filter(line => line.trim() !== ''))}
+                                rows={12}
+                                className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-500 font-mono text-sm leading-relaxed"
+                                placeholder="Ej: HARINA"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="pt-4 flex justify-center">
                         <button
                             type="submit"
-                            className="bg-purple-600 text-white px-6 py-2 rounded-xl hover:bg-purple-700 transition-colors font-medium shadow-md shadow-purple-200"
+                            className="w-full md:w-auto bg-purple-600 text-white px-10 py-3 rounded-2xl hover:bg-purple-700 transition-all font-bold shadow-lg shadow-purple-200 active:scale-95 text-lg"
                         >
                             Guardar Cambios
                         </button>
