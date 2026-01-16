@@ -23,16 +23,19 @@ export default function ReportesPage() {
 
     // 1. Annual Summary
     const annualSummary = useMemo(() => {
-        const years = Array.from(new Set(businessTransactions.map(t => parseLocalDate(t.date).getFullYear()))).sort((a, b) => b - a);
-        if (!years.includes(selectedYear)) years.push(selectedYear);
+        const currentYear = new Date().getFullYear();
+        const yearsSet = new Set([currentYear, currentYear + 1]);
+        businessTransactions.forEach(t => yearsSet.add(parseLocalDate(t.date).getFullYear()));
+
+        const years = Array.from(yearsSet).sort((a, b) => b - a);
 
         return years.map(year => {
             const yearTrans = businessTransactions.filter(t => parseLocalDate(t.date).getFullYear() === year && t.status === 'PAID');
             const sales = yearTrans.filter(t => t.type === 'INCOME').reduce((sum, t) => sum + t.amount, 0);
             const expenses = yearTrans.filter(t => t.type === 'EXPENSE').reduce((sum, t) => sum + t.amount, 0);
             return { year, sales, expenses, savings: sales - expenses };
-        }).sort((a, b) => b.year - a.year);
-    }, [businessTransactions, selectedYear]);
+        });
+    }, [businessTransactions]);
 
     // 2. Monthly Summary (for Selected Year)
     const monthlySummary = useMemo(() => {

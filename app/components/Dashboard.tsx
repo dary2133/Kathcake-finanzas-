@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { useTransactions, useSettings } from '@/app/lib/hooks';
-import { formatCurrency } from '@/app/lib/utils';
+import { formatCurrency, parseLocalDate } from '@/app/lib/utils';
 
 export default function Dashboard() {
     const { transactions, loading } = useTransactions();
     const { settings } = useSettings();
     // Default to KATHCAKE as requested
     const [view, setView] = useState<'ALL' | 'PERSONAL' | 'KATHCAKE'>('KATHCAKE');
+    const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
     if (loading) {
         return <div className="p-8 text-center text-slate-500">Cargando datos...</div>;
@@ -16,14 +17,21 @@ export default function Dashboard() {
 
     const { currencySymbol } = settings;
 
-    // Filter transactions based on view
+    // Filter transactions based on view and year
     const filteredTransactions = transactions.filter(t => {
+        const isYearMatch = parseLocalDate(t.date).getFullYear() === selectedYear;
+        if (!isYearMatch) return false;
+
         if (view === 'ALL') return true;
-        // If it's Kathcake view, include those explicitly marked as KATHCAKE 
-        // OR those that have NO category (to fix the user's issue with old or uncategorized data)
         if (view === 'KATHCAKE') return t.transactionCategory === 'KATHCAKE' || !t.transactionCategory;
         return t.transactionCategory === view;
     });
+
+    // Get list of available years for the selector
+    const currentYear = new Date().getFullYear();
+    const yearsSet = new Set([currentYear, currentYear + 1]);
+    transactions.forEach(t => yearsSet.add(parseLocalDate(t.date).getFullYear()));
+    const availableYears = Array.from(yearsSet).sort((a, b) => b - a);
 
     // Calculate Totals using filtered transactions
     const totalIncome = filteredTransactions
@@ -42,8 +50,20 @@ export default function Dashboard() {
                 <div>
                     <h2 className="text-3xl font-bold text-slate-800 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">Resumen Financiero</h2>
                     <p className="text-sm text-slate-400 mt-1 italic">
-                        Kathcake Business • {new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                        Kathcake Business • {selectedYear}
                     </p>
+                </div>
+
+                <div className="flex gap-4 items-center">
+                    <select
+                        value={selectedYear}
+                        onChange={(e) => setSelectedYear(Number(e.target.value))}
+                        className="bg-white border border-slate-200 text-slate-700 rounded-xl px-4 py-2 font-semibold shadow-sm focus:ring-2 focus:ring-purple-500 outline-none"
+                    >
+                        {availableYears.map(y => (
+                            <option key={y} value={y}>{y}</option>
+                        ))}
+                    </select>
                 </div>
             </div>
 
@@ -79,7 +99,7 @@ export default function Dashboard() {
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
                     <div className="bg-emerald-600 p-4">
                         <h3 className="text-white font-bold text-center uppercase tracking-widest text-sm">
-                            Detalle de Ventas 2025
+                            Detalle de Ventas {selectedYear}
                         </h3>
                     </div>
                     <div className="bg-emerald-500/10 grid grid-cols-2 border-b border-emerald-100 italic">
@@ -118,7 +138,7 @@ export default function Dashboard() {
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
                     <div className="bg-rose-600 p-4">
                         <h3 className="text-white font-bold text-center uppercase tracking-widest text-sm">
-                            Detalle de Gastos 2025
+                            Detalle de Gastos {selectedYear}
                         </h3>
                     </div>
                     <div className="bg-rose-500/10 grid grid-cols-2 border-b border-rose-100 italic">
