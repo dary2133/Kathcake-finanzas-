@@ -155,19 +155,17 @@ export default function CuentasKathcakePage() {
                         {/* ANÁLISIS DE CICLO MENSUAL ÚNICO */}
                         <div className="mt-4 pt-4 border-t border-dashed border-slate-200 text-xs space-y-3">
                             {(function () {
-                                if (safeIncomes.length === 0) return <p className="text-slate-400 italic">Agrega ventas fijas para ver el desglose.</p>;
+                                if (safeIncomes.length === 0) return <p className="text-slate-400 italic text-[10px]">Agrega ventas fijas para ver el desglose.</p>;
 
-                                // Para Kathcake el ciclo es mensual único empezando desde el primer día de pago
-                                const startDay = Math.min(...safeIncomes.map(i => i.paymentDay || 1));
-                                const endDay = startDay === 1 ? 30 : startDay - 1;
-                                const rangeLabel = `PERIODO: DÍA ${startDay} AL ${endDay}`;
+                                // Periodo fijo del 1 al 30 solicitado por usuario
+                                const rangeLabel = `PERIODO: DÍA 1 AL 30`;
 
                                 return (
                                     <div className="bg-white/60 p-4 rounded-xl border border-slate-100 shadow-sm relative group/period">
                                         <div className="flex justify-between items-start mb-3">
                                             <div>
                                                 <span className="font-black text-slate-700 text-[11px] uppercase tracking-tight">{rangeLabel}</span>
-                                                <p className="text-[9px] text-slate-400 font-bold">(MES APROXIMADO)</p>
+                                                <p className="text-[9px] text-slate-400 font-bold">(MES COMERCIAL)</p>
                                             </div>
                                             <span className={`font-black text-[11px] ${netMonthlyFlow >= 0 ? 'text-blue-600' : 'text-orange-500'}`}>
                                                 Balance: {formatCurrency(netMonthlyFlow, currency, currencySymbol)}
