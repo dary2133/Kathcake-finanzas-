@@ -77,66 +77,54 @@ export default function CuentasKathcakePage() {
                         <h3 className={`font-bold uppercase text-[10px] mb-1 ${netMonthlyFlow >= 0 ? 'text-blue-800' : 'text-orange-800'}`}>Margen Fijo Mensual</h3>
                         <p className={`text-2xl font-black ${netMonthlyFlow >= 0 ? 'text-blue-600' : 'text-orange-600'}`}>{formatCurrency(netMonthlyFlow, currency, currencySymbol)}</p>
 
-                        {/* ANÁLISIS DINÁMICO DE PERIODOS */}
+                        {/* ANÁLISIS DE CICLO MENSUAL ÚNICO */}
                         <div className="mt-4 pt-4 border-t border-dashed border-slate-200 text-xs space-y-3">
                             {(function () {
                                 if (safeIncomes.length === 0) return <p className="text-slate-400 italic">Agrega ventas fijas para ver el desglose.</p>;
 
-                                const incomeDays = Array.from(new Set(safeIncomes.map(i => i.paymentDay || 1))).sort((a, b) => a - b);
+                                // Para Kathcake el ciclo es mensual único empezando desde el primer día de pago
+                                const startDay = Math.min(...safeIncomes.map(i => i.paymentDay || 1));
+                                const endDay = startDay === 1 ? 30 : startDay - 1;
+                                const rangeLabel = `PERIODO: DÍA ${startDay} AL ${endDay}`;
 
-                                return incomeDays.map((startDay, index) => {
-                                    const nextStartDay = incomeDays[(index + 1) % incomeDays.length];
-                                    const isLast = index === incomeDays.length - 1;
-                                    const rangeLabel = isLast ? `Periodo: Día ${startDay} al ${nextStartDay > 1 ? nextStartDay - 1 : 30} (prox. mes)` : `Periodo: Día ${startDay} al ${nextStartDay - 1}`;
-
-                                    const periodIncome = safeIncomes.filter(i => (i.paymentDay || 1) === startDay).reduce((sum, i) => sum + (Number(i.amount) || 0), 0);
-
-                                    const expensesInPeriod = safeExpenses.filter(exp => {
-                                        const day = exp.paymentLimitDay || 1;
-                                        if (startDay < nextStartDay) return day >= startDay && day < nextStartDay;
-                                        else return day >= startDay || day < nextStartDay;
-                                    });
-
-                                    const periodExpenseTotal = expensesInPeriod.reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
-                                    const balance = periodIncome - periodExpenseTotal;
-                                    const expenseNames = expensesInPeriod.map(e => e.name).join(', ');
-
-                                    return (
-                                        <div key={startDay} className="bg-white/60 p-3 rounded-xl border border-slate-100 shadow-sm relative group/period">
-                                            <div className="flex justify-between items-start mb-2">
-                                                <span className="font-bold text-slate-700 text-[11px] uppercase tracking-tight">{rangeLabel}</span>
-                                                <span className={`font-bold text-[11px] ${balance >= 0 ? 'text-blue-600' : 'text-orange-500'}`}>
-                                                    Dispo: {formatCurrency(balance, currency, currencySymbol)}
-                                                </span>
+                                return (
+                                    <div className="bg-white/60 p-4 rounded-xl border border-slate-100 shadow-sm relative group/period">
+                                        <div className="flex justify-between items-start mb-3">
+                                            <div>
+                                                <span className="font-black text-slate-700 text-[11px] uppercase tracking-tight">{rangeLabel}</span>
+                                                <p className="text-[9px] text-slate-400 font-bold">(MES APROXIMADO)</p>
                                             </div>
+                                            <span className={`font-black text-[11px] ${netMonthlyFlow >= 0 ? 'text-blue-600' : 'text-orange-500'}`}>
+                                                Balance: {formatCurrency(netMonthlyFlow, currency, currencySymbol)}
+                                            </span>
+                                        </div>
 
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <div className="space-y-0.5">
-                                                    <p className="text-emerald-600 font-bold text-[10px]">Ventas (+{formatCurrency(periodIncome, currency, currencySymbol)})</p>
-                                                </div>
-                                                <div className="relative group/tooltip text-right">
-                                                    <p className="text-rose-500 font-bold text-[10px] cursor-help">Gastos (-{formatCurrency(periodExpenseTotal, currency, currencySymbol)})</p>
-                                                    <p className="text-[9px] text-slate-400 truncate mt-0.5">{expenseNames || 'Sin gastos'}</p>
+                                        <div className="grid grid-cols-2 gap-4 pt-2 border-t border-slate-50">
+                                            <div className="space-y-0.5">
+                                                <p className="text-emerald-600 font-bold text-[10px]">Ventas (+{formatCurrency(totalFixedIncome, currency, currencySymbol)})</p>
+                                            </div>
+                                            <div className="relative group/tooltip text-right">
+                                                <p className="text-rose-500 font-bold text-[10px] cursor-help">Gastos (-{formatCurrency(totalFixedExpense, currency, currencySymbol)})</p>
+                                                <p className="text-[9px] text-slate-400 truncate mt-0.5">{safeExpenses.map(e => e.name).join(', ') || 'Sin gastos'}</p>
 
-                                                    {expensesInPeriod.length > 0 && (
-                                                        <div className="absolute right-0 bottom-full mb-2 hidden group-hover/tooltip:block bg-slate-900 text-white p-3 rounded-xl shadow-2xl z-50 min-w-[220px] text-left border border-slate-700 backdrop-blur-md">
-                                                            <p className="font-bold border-b border-white/10 mb-2 pb-1 text-[10px] uppercase tracking-widest text-slate-400">Gastos del periodo:</p>
-                                                            <div className="max-h-[150px] overflow-y-auto space-y-1.5 pr-1">
-                                                                {expensesInPeriod.map(e => (
-                                                                    <div key={e.id} className="flex justify-between gap-4 text-[10px]">
-                                                                        <span className="text-slate-300 font-medium">{e.name}</span>
-                                                                        <span className="font-mono text-rose-300 font-bold">{formatCurrency(e.amount, currency, currencySymbol)}</span>
-                                                                    </div>
-                                                                ))}
-                                                            </div>
-                                                            <div className="absolute top-full right-4 w-2 h-2 bg-slate-900 rotate-45 -translate-y-1"></div>
+                                                {safeExpenses.length > 0 && (
+                                                    <div className="absolute right-0 bottom-full mb-2 hidden group-hover/tooltip:block bg-slate-900 text-white p-3 rounded-xl shadow-2xl z-50 min-w-[220px] text-left border border-slate-700 backdrop-blur-md">
+                                                        <p className="font-bold border-b border-white/10 mb-2 pb-1 text-[10px] uppercase tracking-widest text-slate-400">Gastos del periodo:</p>
+                                                        <div className="max-h-[150px] overflow-y-auto space-y-1.5 pr-1">
+                                                            {safeExpenses.map(e => (
+                                                                <div key={e.id} className="flex justify-between gap-4 text-[10px]">
+                                                                    <span className="text-slate-300 font-medium">{e.name}</span>
+                                                                    <span className="font-mono text-rose-300 font-bold">{formatCurrency(e.amount, currency, currencySymbol)}</span>
+                                                                </div>
+                                                            ))}
                                                         </div>
-                                                    )}
-                                                </div>
+                                                        <div className="absolute top-full right-4 w-2 h-2 bg-slate-900 rotate-45 -translate-y-1"></div>
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
-                                    );
-                                });
+                                    </div>
+                                );
                             })()}
                         </div>
                     </div>
