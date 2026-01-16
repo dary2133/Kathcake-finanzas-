@@ -61,17 +61,92 @@ export default function CuentasKathcakePage() {
 
                 {/* RESUMEN DE NEGOCIO */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div className="bg-emerald-50 border border-emerald-100 p-4 rounded-2xl shadow-sm">
-                        <h3 className="text-emerald-800 font-bold uppercase text-[9px] mb-1">Caja/Banco Negocio</h3>
-                        <p className="text-xl font-black text-emerald-600">{formatCurrency(totalFunds, currency, currencySymbol)}</p>
+                    {/* CAJA/BANCO NEGOCIO CARD */}
+                    <div className="bg-emerald-50 border border-emerald-100 p-5 rounded-2xl shadow-sm flex flex-col h-full bg-white relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-4 opacity-5">
+                            <span className="text-6xl font-black text-emerald-900">$</span>
+                        </div>
+                        <div className="relative z-10">
+                            <h3 className="text-emerald-800 font-bold uppercase text-[9px] mb-1 tracking-widest">Caja/Banco Negocio</h3>
+                            <p className="text-2xl font-black text-emerald-600 tracking-tight">{formatCurrency(totalFunds, currency, currencySymbol)}</p>
+                        </div>
+
+                        {/* Breakdown of Business Funds */}
+                        <div className="mt-4 pt-3 border-t border-emerald-100/50 space-y-2">
+                            <p className="text-[9px] uppercase font-bold text-emerald-800/40 tracking-wider">Cuentas Disponibles</p>
+                            <div className="space-y-1.5">
+                                {liquidFunds.length === 0 ? <p className="text-[9px] text-slate-400 italic">Sin fondos registrados</p> :
+                                    liquidFunds.map(acc => (
+                                        <div key={acc.id} className="flex justify-between items-center text-[10px]">
+                                            <div className="flex items-center gap-1.5">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
+                                                <span className="text-slate-600 font-medium truncate max-w-[80px]">{acc.name}</span>
+                                            </div>
+                                            <span className="font-bold text-slate-700">{formatCurrency(acc.balance, currency, currencySymbol)}</span>
+                                        </div>
+                                    ))
+                                }
+                            </div>
+                        </div>
                     </div>
-                    <div className="bg-rose-50 border border-rose-100 p-4 rounded-2xl shadow-sm">
-                        <h3 className="text-rose-800 font-bold uppercase text-[9px] mb-1">Deuda Negocio</h3>
-                        <p className="text-xl font-black text-rose-600">{formatCurrency(totalDebt, currency, currencySymbol)}</p>
+
+                    {/* DEUDA NEGOCIO CARD */}
+                    <div className="bg-rose-50 border border-rose-100 p-5 rounded-2xl shadow-sm flex flex-col h-full bg-white relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-4 opacity-5">
+                            <span className="text-6xl font-black text-rose-900">%</span>
+                        </div>
+                        <div className="relative z-10">
+                            <h3 className="text-rose-800 font-bold uppercase text-[9px] mb-1 tracking-widest">Deuda Negocio</h3>
+                            <p className="text-2xl font-black text-rose-600 tracking-tight">{formatCurrency(totalDebt, currency, currencySymbol)}</p>
+                        </div>
+
+                        {/* Breakdown of Business Debt */}
+                        <div className="mt-4 pt-3 border-t border-rose-100/50 space-y-2">
+                            <p className="text-[9px] uppercase font-bold text-rose-800/40 tracking-wider">Tarjetas Corporativas</p>
+                            <div className="space-y-1.5">
+                                {creditCards.length === 0 ? <p className="text-[9px] text-slate-400 italic">Sin deuda registrada</p> :
+                                    creditCards.map(card => (
+                                        <div key={card.id} className="flex justify-between items-center text-[10px] group/card">
+                                            <div className="flex items-center gap-1.5">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-rose-400 group-hover/card:animate-pulse"></div>
+                                                <span className="text-slate-600 font-medium truncate max-w-[80px]">{card.name}</span>
+                                            </div>
+                                            <span className="font-bold text-rose-600">{formatCurrency(card.balance, currency, currencySymbol)}</span>
+                                        </div>
+                                    ))
+                                }
+                            </div>
+                        </div>
                     </div>
-                    <div className="bg-white border border-slate-100 p-4 rounded-2xl shadow-sm">
-                        <h3 className="text-slate-500 font-bold uppercase text-[9px] mb-1">Ventas Fijas</h3>
-                        <p className="text-xl font-black text-slate-800">{formatCurrency(totalFixedIncome, currency, currencySymbol)}</p>
+
+                    {/* VENTAS FIJAS CARD */}
+                    <div className="bg-white border border-slate-100 p-5 rounded-2xl shadow-sm flex flex-col h-full relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-4 opacity-5">
+                            <span className="text-6xl font-black text-slate-900">#</span>
+                        </div>
+                        <div className="relative z-10">
+                            <h3 className="text-slate-500 font-bold uppercase text-[9px] mb-1 tracking-widest">Ventas Fijas</h3>
+                            <p className="text-2xl font-black text-slate-800 tracking-tight">{formatCurrency(totalFixedIncome, currency, currencySymbol)}</p>
+                        </div>
+
+                        {/* Breakdown of Fixed Sales */}
+                        <div className="mt-4 pt-3 border-t border-slate-100 space-y-2">
+                            <p className="text-[9px] uppercase font-bold text-slate-400 tracking-wider">Principales Fuentes</p>
+                            <div className="space-y-1.5">
+                                {safeIncomes.length === 0 ? <p className="text-[9px] text-slate-400 italic">Sin ventas fijas</p> :
+                                    safeIncomes.slice(0, 3).map(inc => (
+                                        <div key={inc.id} className="flex justify-between items-center text-[10px]">
+                                            <div className="flex items-center gap-1.5">
+                                                <div className="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
+                                                <span className="text-slate-600 font-medium truncate max-w-[80px]">{inc.name}</span>
+                                            </div>
+                                            <span className="font-bold text-slate-700">{formatCurrency(inc.amount, currency, currencySymbol)}</span>
+                                        </div>
+                                    ))
+                                }
+                                {safeIncomes.length > 3 && <p className="text-[9px] text-slate-400 text-right italic pt-1">...y {safeIncomes.length - 3} más</p>}
+                            </div>
+                        </div>
                     </div>
                     <div className={`p-6 rounded-2xl shadow-sm border ${netMonthlyFlow >= 0 ? 'bg-blue-50 border-blue-200' : 'bg-orange-50 border-orange-200'}`}>
                         <h3 className={`font-bold uppercase text-[10px] mb-1 ${netMonthlyFlow >= 0 ? 'text-blue-800' : 'text-orange-800'}`}>Margen Fijo Mensual</h3>
