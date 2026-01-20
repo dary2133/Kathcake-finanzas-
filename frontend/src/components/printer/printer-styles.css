@@ -1,0 +1,77 @@
+/* printer-styles.css */
+.print-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 20px 0;
+}
+
+.print-btn {
+    padding: 12px 24px;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-weight: bold;
+}
+
+.print-btn.direct-print {
+    background: linear-gradient(135deg, #4CAF50, #2E7D32);
+    color: white;
+}
+
+.print-btn.browser-print {
+    background: linear-gradient(135deg, #2196F3, #0D47A1);
+    color: white;
+}
+
+.print-btn:disabled {
+    background: #cccccc;
+    cursor: not-allowed;
+}
+
+.print-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.test-print-btn {
+    padding: 8px 16px;
+    background: #ff9800;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.printer-status {
+    text-align: center;
+    font-size: 12px;
+    color: #666;
+    padding: 5px;
+    background: #f5f5f5;
+    border-radius: 4px;
+}
+
+/* Indicador en la esquina de la app */
+.printer-indicator {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    z-index: 1000;
+}
+
+.printer-indicator.connected {
+    background: #4CAF50;
+    color: white;
+}
+
+.printer-indicator.disconnected {
+    background: #f44336;
+    color: white;
+}

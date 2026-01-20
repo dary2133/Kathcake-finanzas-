@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_PRISMA_URL") // Vercel uses this for Prisma
+}
+
+model User {
+  id           String    @id @default(cuid())
+  name         String
+  email        String?   @unique
+  password     String
+  role         String    @default("seller")
+  phone        String?   @unique
+  address      String?
+  profileImage String    @default("https://res.cloudinary.com/demo/image/upload/v1631649123/default-avatar.png")
+  isActive     Boolean   @default(true)
+  permissions  Json?     @default("{}")
+  lastLogin    DateTime?
+  createdAt    DateTime  @default(now())
+  products     Product[] @relation("UserProducts")
+  sales        Sale[]    @relation("UserSales")
+}
+
+model Product {
+  id              String   @id @default(cuid())
+  name            String
+  description     String?
+  category        String
+  price           Float
+  cost            Float?
+  stock           Int      @default(0)
+  minStock        Int      @default(5)
+  preparationTime Int?
+  hasVariants     Boolean  @default(false)
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  
+  images          Json?    @default("[]")
+  ingredients     Json?    @default("[]")
+  variants        Json?    @default("[]")
+  tags            String[]
+  
+  createdById     String?
+  createdBy       User?    @relation("UserProducts", fields: [createdById], references: [id])
+  saleItems       SaleItem[]
+}
+
+model Sale {
+  id            String     @id @default(cuid())
+  invoiceNumber String     @unique
+  subtotal      Float
+  tax           Float      @default(0)
+  discount      Float      @default(0)
+  discountType  String     @default("none")
+  total         Float
+  paymentMethod String
+  status        String     @default("paid")
+  createdAt     DateTime   @default(now())
+  
+  customer      Json?      @default("{}")
+  items         SaleItem[]
+  
+  sellerId      String
+  seller        User       @relation("UserSales", fields: [sellerId], references: [id])
+}
+
+model SaleItem {
+  id          String  @id @default(cuid())
+  productId   String
+  product     Product @relation(fields: [productId], references: [id])
+  productName String
+  quantity    Int
+  unitPrice   Float
+  subtotal    Float
+  
+  saleId      String
+  sale        Sale    @relation(fields: [saleId], references: [id])
+}
