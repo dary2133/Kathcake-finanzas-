@@ -15,6 +15,11 @@ export interface Product {
     cost: number;
     stock: number;
     category: string;
+    categoryId?: string;
+    categoryData?: {
+        id: string;
+        name: string;
+    };
     images: { url: string }[];
     description?: string;
     minStock?: number;
@@ -56,3 +61,44 @@ export interface Sale {
     };
     createdAt: string;
 }
+
+export interface Setting {
+    id: string;
+    businessName: string;
+    logo?: string;
+    country: string;
+    currency: string;
+    currencySymbol: string;
+    taxRate: number;
+    address: string;
+    phone: string;
+    email: string;
+    instagram?: string;
+    facebook?: string;
+    twitter?: string;
+    website?: string;
+    lowStockAlert: number;
+    language: string;
+    timezone: string;
+    notifications: {
+        lowStock: boolean;
+        dailyReport: boolean;
+        securityAlerts: boolean;
+    };
+    updatedAt: string;
+}
+
+export interface Category {
+    _id: string;
+    name: string;
+    description?: string;
+}
+
+export interface Customer {
+    _id: string;
+    name: string;
+    email?: string;
+    phone?: string;
+    taxId?: string;
+}
+

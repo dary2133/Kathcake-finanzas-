@@ -54,7 +54,7 @@ export default function Layout() {
                     <div className="relative group">
                         <div className="absolute -inset-2 bg-primary-500/20 rounded-full opacity-30 blur-2xl group-hover:opacity-100 transition duration-1000"></div>
                         <img
-                            src="/Kath Cake logo Vector33.png"
+                            src="/logo.png"
                             alt="Kathcake Logo"
                             className="w-44 h-44 object-contain relative z-10"
                         />
@@ -68,13 +68,6 @@ export default function Layout() {
                             <span>Repostería Gourmet</span>
                         </div>
                     </div>
-
-                    {/* Indicador de Modo Demo */}
-                    {localStorage.getItem('token') === 'demo-token-123' && (
-                        <div className="px-3 py-1 bg-red-500/20 border border-red-500/50 rounded-full animate-pulse relative z-10">
-                            <span className="text-[8px] font-black uppercase tracking-[0.2em] text-red-400">⚠️ Modo Demo (No guarda)</span>
-                        </div>
-                    )}
                 </div>
 
                 <nav className="flex-1 px-6 py-10 space-y-3 overflow-y-auto custom-scrollbar">
@@ -163,7 +156,7 @@ export default function Layout() {
             {/* Main Content Area */}
             <div className="flex-1 flex flex-col min-w-0 bg-slate-50">
                 {/* Header */}
-                <header className="h-24 bg-white/70 backdrop-blur-xl border-b border-slate-100 px-6 lg:px-12 flex items-center justify-between sticky top-0 z-30 shadow-sm">
+                <header className={`${location.pathname === '/pos' ? 'h-16' : 'h-24'} bg-white/70 backdrop-blur-xl border-b border-slate-100 px-6 lg:px-12 flex items-center justify-between sticky top-0 z-30 shadow-sm transition-all duration-300`}>
                     <div className="flex items-center gap-6">
                         <button onClick={() => setMobileMenuOpen(true)} className="lg:hidden p-3 bg-slate-50 rounded-2xl text-slate-500">
                             <Menu className="w-6 h-6" />
@@ -177,16 +170,18 @@ export default function Layout() {
                         </div>
                     </div>
 
-                    <div className="flex-1 max-w-xl mx-12 hidden xl:block">
-                        <div className="relative">
-                            <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
-                            <input
-                                type="text"
-                                placeholder="Busca pedidos, clientes o productos..."
-                                className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 pl-14 pr-6 focus:bg-white focus:ring-[10px] focus:ring-primary-500/5 transition-all font-bold text-sm tracking-tight shadow-inner"
-                            />
+                    {location.pathname !== '/pos' && (
+                        <div className="flex-1 max-w-xl mx-12 hidden xl:block">
+                            <div className="relative">
+                                <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
+                                <input
+                                    type="text"
+                                    placeholder="Busca pedidos, clientes o productos..."
+                                    className="w-full bg-slate-50 border border-slate-100 rounded-2xl py-4 pl-14 pr-6 focus:bg-white focus:ring-[10px] focus:ring-primary-500/5 transition-all font-bold text-sm tracking-tight shadow-inner"
+                                />
+                            </div>
                         </div>
-                    </div>
+                    )}
 
                     <div className="flex items-center gap-6">
                         <div className="flex items-center gap-2">
@@ -209,7 +204,7 @@ export default function Layout() {
                 </header>
 
                 {/* Content */}
-                <main className="flex-1 p-6 lg:p-12 overflow-y-auto custom-scrollbar">
+                <main className={`flex-1 overflow-y-auto custom-scrollbar ${location.pathname === '/pos' ? 'p-2 lg:p-4' : 'p-6 lg:p-12'}`}>
                     <div className="max-w-[1800px] mx-auto">
                         <Outlet />
                     </div>

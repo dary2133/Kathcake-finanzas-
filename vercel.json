@@ -1,6 +1,6 @@
 {
     "version": 2,
-    "buildCommand": "npm run db:push && npm run build --workspace=frontend",
+    "buildCommand": "npm run prisma:generate && npm run db:push && cd frontend && npm run build",
     "outputDirectory": "frontend/dist",
     "rewrites": [
         {

@@ -1,0 +1,153 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(cuid())
+  name         String
+  email        String?   @unique
+  password     String
+  role         String    @default("seller")
+  phone        String?   @unique
+  address      String?
+  profileImage String    @default("https://res.cloudinary.com/demo/image/upload/v1631649123/default-avatar.png")
+  isActive     Boolean   @default(true)
+  permissions  Json?     @default("{}")
+  lastLogin    DateTime?
+  createdAt    DateTime  @default(now())
+  products     Product[] @relation("UserProducts")
+  sales        Sale[]    @relation("UserSales")
+  
+  openedSessions CashRegisterSession[] @relation("UserOpenedSessions")
+  closedSessions CashRegisterSession[] @relation("UserClosedSessions")
+  expenses      Expense[] @relation("UserExpenses")
+}
+
+model Expense {
+  id            String   @id @default(cuid())
+  description   String
+  amount        Float
+  category      String
+  date          DateTime @default(now())
+  paymentMethod String
+  provider      String?
+  status        String   @default("paid") // paid, debt
+  notes         String?
+  
+  userId        String
+  user          User     @relation("UserExpenses", fields: [userId], references: [id])
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Product {
+  id              String   @id @default(cuid())
+  name            String
+  description     String?
+  category        String?
+  categoryId      String?
+  categoryData    Category? @relation(fields: [categoryId], references: [id])
+  price           Float
+  cost            Float?
+  stock           Int      @default(0)
+  minStock        Int      @default(5)
+  preparationTime Int?
+  hasVariants     Boolean  @default(false)
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  
+  images          Json?    @default("[]")
+  ingredients     Json?    @default("[]")
+  variants        Json?    @default("[]")
+  tags            String[]
+  
+  createdById     String?
+  createdBy       User?    @relation("UserProducts", fields: [createdById], references: [id])
+  saleItems       SaleItem[]
+}
+
+model Category {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  products  Product[]
+}
+
+model Sale {
+  id            String     @id @default(cuid())
+  invoiceNumber String     @unique
+  subtotal      Float
+  tax           Float      @default(0)
+  discount      Float      @default(0)
+  discountType  String     @default("none")
+  total         Float
+  paymentMethod String
+  status        String     @default("paid")
+  createdAt     DateTime   @default(now())
+  
+  customer      Json?      @default("{}")
+  items         SaleItem[]
+  
+  sellerId      String
+  seller        User       @relation("UserSales", fields: [sellerId], references: [id])
+  
+  sessionId     String?
+  session       CashRegisterSession? @relation("SessionSales", fields: [sessionId], references: [id])
+}
+
+model SaleItem {
+  id          String  @id @default(cuid())
+  productId   String
+  product     Product @relation(fields: [productId], references: [id])
+  productName String
+  quantity    Int
+  unitPrice   Float
+  subtotal    Float
+  
+  saleId      String
+  sale        Sale    @relation(fields: [saleId], references: [id])
+}
+
+model CashRegisterSession {
+  id             String    @id @default(cuid())
+  openedAt       DateTime  @default(now())
+  closedAt       DateTime?
+  initialCash    Float
+  expectedCash   Float?
+  countedCash    Float?
+  discrepancy    Float?
+  notes          String?
+  status         String    @default("open") // open, closed
+  
+  openedById     String
+  openedBy       User      @relation("UserOpenedSessions", fields: [openedById], references: [id])
+  
+  closedById     String?
+  closedBy       User?     @relation("UserClosedSessions", fields: [closedById], references: [id])
+  
+  sales          Sale[]    @relation("SessionSales")
+}
+
+model Setting {
+  id              String   @id @default("global")
+  businessName    String   @default("Kathcake POS")
+  country         String   @default("República Dominicana")
+  currency        String   @default("DOP")
+  currencySymbol  String   @default("RD$")
+  taxRate         Float    @default(18)
+  address         String   @default("Santo Domingo, República Dominicana")
+  phone           String   @default("+1 829 531 2107")
+  email           String   @default("contacto@kathcake.com")
+  lowStockAlert   Int      @default(5)
+  language        String   @default("es")
+  timezone        String   @default("(GMT-04:00) Santo Domingo")
+  notifications   Json?    @default("{\"lowStock\":true, \"dailyReport\":true, \"securityAlerts\":true}")
+  updatedAt       DateTime @updatedAt
+}
