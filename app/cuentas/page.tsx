@@ -307,8 +307,8 @@ export default function CuentasPage() {
                                 <h4 className="font-bold">Disponibilidad (Cuentas)</h4>
                                 <button onClick={() => { setAccountFormSection('REGULAR'); setShowAccountForm(true); }} className="text-[10px] bg-blue-600 px-3 py-1.5 rounded font-bold uppercase tracking-wider shadow-sm hover:bg-blue-700 transition-colors">+ NUEVA CUENTA</button>
                             </div>
-                            {showAccountForm && (!accountFormSection || accountFormSection === 'REGULAR') && (
-                                <div className="p-4 border-b"><AccountForm defaultType="BANK" defaultCategory="PERSONAL" initialData={editingAccount} onSuccess={handleAccountSuccess} onCancel={() => setShowAccountForm(false)} /></div>
+                            {showAccountForm && accountFormSection === 'REGULAR' && (
+                                <div className="p-4 border-b"><AccountForm defaultType="BANK" defaultCategory="PERSONAL" initialData={editingAccount} onSuccess={handleAccountSuccess} onCancel={() => { setShowAccountForm(false); setEditingAccount(null); }} /></div>
                             )}
                             <div className="p-4 grid grid-cols-1 gap-3">
                                 {liquidFunds.length === 0 ? <p className="text-center py-6 text-slate-400 text-sm italic">Sin cuentas registradas.</p> :
@@ -341,15 +341,26 @@ export default function CuentasPage() {
                                     <button onClick={() => { setAccountFormSection('CREDIT'); setShowAccountForm(true); }} className="text-[10px] bg-slate-200 text-slate-600 px-2 py-1 rounded">+ TARJETA</button>
                                 </div>
                             </div>
+                            {showAccountForm && accountFormSection === 'CREDIT' && (
+                                <div className="p-4 border-b"><AccountForm defaultType="CREDIT" defaultCategory="PERSONAL" initialData={editingAccount} onSuccess={handleAccountSuccess} onCancel={() => { setShowAccountForm(false); setEditingAccount(null); }} /></div>
+                            )}
                             {showCardExpenseForm && (
                                 <div className="p-4 border-b"><CardExpenseForm creditCards={creditCards} onSuccess={handleCardExpenseSuccess} onCancel={() => setShowCardExpenseForm(false)} /></div>
                             )}
                             <div className="p-4 space-y-4">
                                 {creditCards.map(card => (
-                                    <div key={card.id} className="relative p-4 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 text-white shadow-lg overflow-hidden">
+                                    <div key={card.id} className="relative p-4 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 text-white shadow-lg overflow-hidden group/card">
                                         <div className="relative z-10 flex justify-between items-start">
                                             <div>
-                                                <p className="text-[10px] uppercase opacity-60 font-medium tracking-widest">{card.name}</p>
+                                                <div className="flex items-center gap-2">
+                                                    <p className="text-[10px] uppercase opacity-60 font-medium tracking-widest">{card.name}</p>
+                                                    <button
+                                                        onClick={() => { setEditingAccount(card); setAccountFormSection('CREDIT'); setShowAccountForm(true); }}
+                                                        className="opacity-0 group-hover/card:opacity-100 text-[9px] bg-white/10 hover:bg-white/20 px-2 py-0.5 rounded transition-all uppercase font-bold"
+                                                    >
+                                                        Editar
+                                                    </button>
+                                                </div>
                                                 <p className="text-xl font-bold mt-1">{formatCurrency(card.balance, currency, currencySymbol)}</p>
                                             </div>
                                             <div className="text-right">
