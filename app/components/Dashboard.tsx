@@ -46,11 +46,12 @@ export default function Dashboard() {
     transactions.forEach(t => yearsSet.add(parseLocalDate(t.date).getFullYear()));
 
     // Add a generous range around the current year
-    for (let y = 2020; y <= 2035; y++) {
+    for (let y = 2024; y <= 2040; y++) {
         yearsSet.add(y);
     }
 
     const availableYears = Array.from(yearsSet).sort((a, b) => b - a);
+    const availableYearsAsc = Array.from(yearsSet).sort((a, b) => a - b);
 
     // Calculate Totals using filtered transactions
     const totalIncome = filteredTransactions
@@ -110,6 +111,111 @@ export default function Dashboard() {
                     currency={settings.currency}
                     symbol={currencySymbol}
                 />
+            </div>
+
+            {/* Annual & Monthly Summaries */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Annual Summary */}
+                <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
+                    <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6">Resumen Ventas y Gastos Anuales</h3>
+                    <div className="overflow-x-auto">
+                        <table className="w-full">
+                            <thead>
+                                <tr className="border-b border-slate-100 text-left">
+                                    <th className="py-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Año</th>
+                                    <th className="py-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider text-right">Ventas</th>
+                                    <th className="py-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider text-right">Gastos</th>
+                                    <th className="py-3 text-[10px] font-bold text-sky-600 uppercase tracking-wider text-right">Ahorro</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-50">
+                                {availableYearsAsc
+                                    .filter(y => y >= selectedYear) // Start from selected year like in screenshot
+                                    .slice(0, 12) // Show next 12 years
+                                    .map(year => {
+                                        // Calculate totals for this specific year
+                                        const yearTransactions = transactions.filter(t => {
+                                            const tYear = parseLocalDate(t.date).getFullYear();
+                                            if (tYear !== year) return false;
+                                            if (view === 'ALL') return true;
+                                            if (view === 'KATHCAKE') return t.transactionCategory === 'KATHCAKE' || !t.transactionCategory;
+                                            return t.transactionCategory === view;
+                                        });
+
+                                        const yearIncome = yearTransactions
+                                            .filter(t => t.type === 'INCOME' && t.status === 'PAID')
+                                            .reduce((sum, t) => sum + t.amount, 0);
+
+                                        const yearExpense = yearTransactions
+                                            .filter(t => t.type === 'EXPENSE' && t.status === 'PAID')
+                                            .reduce((sum, t) => sum + t.amount, 0);
+
+                                        const yearNet = yearIncome - yearExpense;
+
+                                        // Skip years with absolutely no data if you prefer, 
+                                        // but usually users want to see the row if the year is in the list
+
+                                        return (
+                                            <tr key={year} className="group hover:bg-slate-50/50 transition-colors">
+                                                <td className="py-3 text-xs font-bold text-slate-700">{year}</td>
+                                                <td className="py-3 text-xs font-bold text-emerald-500 text-right">{formatCurrency(yearIncome, settings.currency, currencySymbol)}</td>
+                                                <td className="py-3 text-xs font-bold text-rose-500 text-right">{formatCurrency(yearExpense, settings.currency, currencySymbol)}</td>
+                                                <td className="py-3 text-xs font-bold text-sky-600 text-right">{formatCurrency(yearNet, settings.currency, currencySymbol)}</td>
+                                            </tr>
+                                        );
+                                    })}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                {/* Monthly Summary */}
+                <div className="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
+                    <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6">Resumen Ventas y Gastos Mensuales</h3>
+                    <div className="overflow-x-auto">
+                        <table className="w-full">
+                            <thead>
+                                <tr className="border-b border-slate-100 text-left">
+                                    <th className="py-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Mes</th>
+                                    <th className="py-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider text-right">Ventas</th>
+                                    <th className="py-3 text-[10px] font-bold text-slate-400 uppercase tracking-wider text-right">Gastos</th>
+                                    <th className="py-3 text-[10px] font-bold text-sky-600 uppercase tracking-wider text-right">Ahorro</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-50">
+                                {Array.from({ length: 12 }, (_, i) => i).map(monthIndex => {
+                                    const monthName = new Date(selectedYear, monthIndex).toLocaleString('es-ES', { month: 'long' });
+                                    const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+
+                                    // Calculate totals for this month in the selected year
+                                    // We can reuse filteredTransactions since it's already filtered by selectedYear
+                                    const monthTransactions = filteredTransactions.filter(t => {
+                                        return parseLocalDate(t.date).getMonth() === monthIndex;
+                                    });
+
+                                    const monthIncome = monthTransactions
+                                        .filter(t => t.type === 'INCOME' && t.status === 'PAID')
+                                        .reduce((sum, t) => sum + t.amount, 0);
+
+                                    const monthExpense = monthTransactions
+                                        .filter(t => t.type === 'EXPENSE' && t.status === 'PAID')
+                                        .reduce((sum, t) => sum + t.amount, 0);
+
+                                    const monthNet = monthIncome - monthExpense;
+
+                                    return (
+                                        <tr key={monthIndex} className="group hover:bg-slate-50/50 transition-colors">
+                                            <td className="py-3 text-xs font-bold text-slate-700">{capitalizedMonth}</td>
+                                            <td className="py-3 text-xs font-bold text-emerald-500 text-right">{formatCurrency(monthIncome, settings.currency, currencySymbol)}</td>
+                                            <td className="py-3 text-xs font-bold text-rose-500 text-right">{formatCurrency(monthExpense, settings.currency, currencySymbol)}</td>
+                                            <td className="py-3 text-xs font-bold text-sky-600 text-right">{formatCurrency(monthNet, settings.currency, currencySymbol)}</td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
 
             {/* Detailed Grouped Summary */}

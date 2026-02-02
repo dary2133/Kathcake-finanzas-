@@ -344,12 +344,28 @@ export default function CuentasPage() {
                             {showCardExpenseForm && (
                                 <div className="p-4 border-b"><CardExpenseForm creditCards={creditCards} onSuccess={handleCardExpenseSuccess} onCancel={() => setShowCardExpenseForm(false)} /></div>
                             )}
+                            {showAccountForm && accountFormSection === 'CREDIT' && (
+                                <div className="p-4 border-b"><AccountForm defaultType="CREDIT" defaultCategory="PERSONAL" initialData={editingAccount} onSuccess={handleAccountSuccess} onCancel={() => setShowAccountForm(false)} onDelete={(id) => { if(window.confirm('¿Borrar tarjeta?')) { removeAccount(id); setShowAccountForm(false); } }} /></div>
+                            )}
                             <div className="p-4 space-y-4">
                                 {creditCards.map(card => (
-                                    <div key={card.id} className="relative p-4 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 text-white shadow-lg overflow-hidden">
+                                    <div key={card.id} className="relative p-4 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 text-white shadow-lg overflow-hidden group">
                                         <div className="relative z-10 flex justify-between items-start">
                                             <div>
-                                                <p className="text-[10px] uppercase opacity-60 font-medium tracking-widest">{card.name}</p>
+                                                <p className="text-[10px] uppercase opacity-60 font-medium tracking-widest flex items-center gap-2">
+                                                    {card.name}
+                                                    <button 
+                                                        onClick={(e) => { 
+                                                            e.stopPropagation();
+                                                            setEditingAccount(card); 
+                                                            setAccountFormSection('CREDIT'); 
+                                                            setShowAccountForm(true); 
+                                                        }} 
+                                                        className="opacity-0 group-hover:opacity-100 p-1 hover:bg-white/10 rounded transition-all"
+                                                    >
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+                                                    </button>
+                                                </p>
                                                 <p className="text-xl font-bold mt-1">{formatCurrency(card.balance, currency, currencySymbol)}</p>
                                             </div>
                                             <div className="text-right">
