@@ -307,8 +307,8 @@ export default function CuentasPage() {
                                 <h4 className="font-bold">Disponibilidad (Cuentas)</h4>
                                 <button onClick={() => { setAccountFormSection('REGULAR'); setShowAccountForm(true); }} className="text-[10px] bg-blue-600 px-3 py-1.5 rounded font-bold uppercase tracking-wider shadow-sm hover:bg-blue-700 transition-colors">+ NUEVA CUENTA</button>
                             </div>
-                            {showAccountForm && (!accountFormSection || accountFormSection === 'REGULAR') && (
-                                <div className="p-4 border-b"><AccountForm defaultType="BANK" defaultCategory="PERSONAL" initialData={editingAccount} onSuccess={handleAccountSuccess} onCancel={() => setShowAccountForm(false)} /></div>
+                            {showAccountForm && accountFormSection === 'REGULAR' && (
+                                <div className="p-4 border-b"><AccountForm defaultType="BANK" defaultCategory="PERSONAL" initialData={editingAccount} onSuccess={handleAccountSuccess} onCancel={() => { setShowAccountForm(false); setEditingAccount(null); }} /></div>
                             )}
                             <div className="p-4 grid grid-cols-1 gap-3">
                                 {liquidFunds.length === 0 ? <p className="text-center py-6 text-slate-400 text-sm italic">Sin cuentas registradas.</p> :
@@ -341,11 +341,14 @@ export default function CuentasPage() {
                                     <button onClick={() => { setAccountFormSection('CREDIT'); setShowAccountForm(true); }} className="text-[10px] bg-slate-200 text-slate-600 px-2 py-1 rounded">+ TARJETA</button>
                                 </div>
                             </div>
+                            {showAccountForm && accountFormSection === 'CREDIT' && (
+                                <div className="p-4 border-b"><AccountForm defaultType="CREDIT" defaultCategory="PERSONAL" initialData={editingAccount} onSuccess={handleAccountSuccess} onCancel={() => { setShowAccountForm(false); setEditingAccount(null); }} /></div>
+                            )}
                             {showCardExpenseForm && (
                                 <div className="p-4 border-b"><CardExpenseForm creditCards={creditCards} onSuccess={handleCardExpenseSuccess} onCancel={() => setShowCardExpenseForm(false)} /></div>
                             )}
                             {showAccountForm && accountFormSection === 'CREDIT' && (
-                                <div className="p-4 border-b"><AccountForm defaultType="CREDIT" defaultCategory="PERSONAL" initialData={editingAccount} onSuccess={handleAccountSuccess} onCancel={() => setShowAccountForm(false)} onDelete={(id) => { if(window.confirm('¿Borrar tarjeta?')) { removeAccount(id); setShowAccountForm(false); } }} /></div>
+                                <div className="p-4 border-b"><AccountForm defaultType="CREDIT" defaultCategory="PERSONAL" initialData={editingAccount} onSuccess={handleAccountSuccess} onCancel={() => setShowAccountForm(false)} onDelete={(id) => { if (window.confirm('¿Borrar tarjeta?')) { removeAccount(id); setShowAccountForm(false); } }} /></div>
                             )}
                             <div className="p-4 space-y-4">
                                 {creditCards.map(card => (
@@ -354,13 +357,13 @@ export default function CuentasPage() {
                                             <div>
                                                 <p className="text-[10px] uppercase opacity-60 font-medium tracking-widest flex items-center gap-2">
                                                     {card.name}
-                                                    <button 
-                                                        onClick={(e) => { 
+                                                    <button
+                                                        onClick={(e) => {
                                                             e.stopPropagation();
-                                                            setEditingAccount(card); 
-                                                            setAccountFormSection('CREDIT'); 
-                                                            setShowAccountForm(true); 
-                                                        }} 
+                                                            setEditingAccount(card);
+                                                            setAccountFormSection('CREDIT');
+                                                            setShowAccountForm(true);
+                                                        }}
                                                         className="opacity-0 group-hover:opacity-100 p-1 hover:bg-white/10 rounded transition-all"
                                                     >
                                                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
